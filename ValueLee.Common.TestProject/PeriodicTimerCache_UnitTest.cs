@@ -1,6 +1,6 @@
 ﻿namespace ValueLee.Common.TestProject
 {
-    public class PeriodicTimerManager_UnitTest
+    public class PeriodicTimerCache_UnitTest
     {
         private int i = 0;
 
@@ -8,7 +8,7 @@
         public void Test1()
         {
             {
-                using var timerManager = new PeriodicTimerManager();
+                using var timerManager = new PeriodicTimerCache();
                 timerManager.PresetPeriod("testTimer", 100);
                 var timer = timerManager.GetTimer("testTimer");
                 timer.TimerCallback += Timer_TimerCallback;
@@ -19,7 +19,7 @@
             }
 
             {
-                var timerManager = new PeriodicTimerManager();
+                var timerManager = new PeriodicTimerCache();
                 timerManager.PresetPeriod("Timer1", 100);
                 timerManager.PresetPeriod("Timer2", 100);
                 timerManager.PresetPeriod("Timer3", 100);

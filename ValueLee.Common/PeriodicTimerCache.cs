@@ -10,7 +10,7 @@ using System.Timers;
 
 namespace ValueLee.Common
 {
-    public sealed class PeriodicTimerManager : IDisposable
+    public sealed class PeriodicTimerCache : IDisposable
     {
         private readonly int _defaultPeriodMS;
 
@@ -20,7 +20,7 @@ namespace ValueLee.Common
         private readonly List<(string id, WeakReference timer)> _timers;
         private readonly object _timersLocker;
 
-        public PeriodicTimerManager()
+        public PeriodicTimerCache()
         {
             _timers = new List<(string id, WeakReference timer)>();
             _periods = new List<(string id, int periodMS)>();
@@ -75,7 +75,7 @@ namespace ValueLee.Common
                     else
                     {
                         var timer = new PeriodicTimer(GetPeriod(id));
-                        timer.TimerManager = this;
+                        timer.TimerCache = this;
                         _timers.Add((id, new WeakReference(timer)));
                         return timer;
                     }
@@ -83,14 +83,14 @@ namespace ValueLee.Common
                 else
                 {
                     var timer = new PeriodicTimer(GetPeriod(id));
-                    timer.TimerManager = this;
+                    timer.TimerCache = this;
                     _timers.Add((id, new WeakReference(timer)));
                     return timer;
                 }
             }
         }
 
-        public PeriodicTimerManager PresetPeriod(string id, int periodMS)
+        public PeriodicTimerCache PresetPeriod(string id, int periodMS)
         {
             if (id == null)
             {

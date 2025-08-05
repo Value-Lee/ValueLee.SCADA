@@ -29,7 +29,7 @@ namespace ValueLee.Common
 
         public event Action TimerCallback;
 
-        internal PeriodicTimerManager TimerManager { get; set; }
+        internal PeriodicTimerCache TimerCache { get; set; }
 
         public void Dispose()
         {
@@ -37,7 +37,7 @@ namespace ValueLee.Common
             {
                 if (!_disposed)
                 {
-                    this.TimerManager?.RemoveTimer(this);
+                    this.TimerCache?.RemoveTimer(this);
                     if (_timer != null)
                     {
                         _timer.Dispose();

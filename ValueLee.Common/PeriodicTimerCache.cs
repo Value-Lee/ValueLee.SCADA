@@ -12,13 +12,15 @@ namespace ValueLee.Common
 {
     public sealed class PeriodicTimerCache : IDisposable
     {
-        private readonly int _defaultPeriodMS;
+        private readonly List<(string id, int periodMS)> _periods;
 
         private readonly object _periodsLocker;
 
-        private readonly List<(string id, int periodMS)> _periods;
         private readonly List<(string id, WeakReference timer)> _timers;
+
         private readonly object _timersLocker;
+
+        private int _defaultPeriodMS;
 
         public PeriodicTimerCache()
         {
@@ -29,6 +31,18 @@ namespace ValueLee.Common
             _timersLocker = ((ICollection)_timers).SyncRoot;
 
             _defaultPeriodMS = 100;
+        }
+
+        public int DefaultPeriodMS
+        {
+            get => _defaultPeriodMS; set
+            {
+                if (value <= 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), "Default period must be greater than zero.");
+                }
+                _defaultPeriodMS = value;
+            }
         }
 
         public void Dispose()
@@ -74,19 +88,21 @@ namespace ValueLee.Common
                     }
                     else
                     {
-                        var timer = new PeriodicTimer(GetPeriod(id));
-                        timer.TimerCache = this;
-                        _timers.Add((id, new WeakReference(timer)));
-                        return timer;
+                        return Add();
                     }
                 }
                 else
                 {
-                    var timer = new PeriodicTimer(GetPeriod(id));
-                    timer.TimerCache = this;
-                    _timers.Add((id, new WeakReference(timer)));
-                    return timer;
+                    return Add();
                 }
+            }
+
+            PeriodicTimer Add()
+            {
+                var timer = new PeriodicTimer(GetPeriod(id));
+                timer.TimerCache = this;
+                _timers.Add((id, new WeakReference(timer)));
+                return timer;
             }
         }
 
@@ -134,7 +150,7 @@ namespace ValueLee.Common
                 var target = _periods.FirstOrDefault(p => p.id == id);
                 if (target == default((string, int)))
                 {
-                    return _defaultPeriodMS;
+                    return DefaultPeriodMS;
                 }
                 return target.periodMS;
             }

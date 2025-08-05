@@ -1,0 +1,105 @@
+﻿<Window
+    x:Class="ValueLee.Configuration.WpfControls.TestProject.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:ValueLee.Configuration.WpfControls.TestProject"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    xmlns:wpfcontrols="clr-namespace:ValueLee.Configuration.WpfControls;assembly=ValueLee.Configuration.WpfControls"
+    Name="Self"
+    Title="MainWindow"
+    FontSize="16"
+    Loaded="Self_Loaded"
+    SizeToContent="WidthAndHeight"
+    mc:Ignorable="d">
+    <StackPanel>
+        <wpfcontrols:PrimitiveConfigSourceView
+            x:Name="PrimitiveConfigSourceView"
+            Grid.Column="0"
+            Height="600"
+            Margin="20"
+            VerticalAlignment="Top"
+            Background="AliceBlue"
+            DataGridWidth="1200"
+            IsExpandCollapseVisible="True"
+            IsSearchBoxVisible="True"
+            IsTreeViewNavigationVisible="True">
+
+            <!--<wpfcontrols:PrimitiveConfigSourceView.DisableNodes>
+                <sys:String>System</sys:String>
+            </wpfcontrols:PrimitiveConfigSourceView.DisableNodes>-->
+        </wpfcontrols:PrimitiveConfigSourceView>
+        <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+            <Button
+                x:Name="BtnSubmit"
+                Width="100"
+                Margin="0,0,50,0"
+                Click="BtnSubmit_Click"
+                Content="提交" />
+            <Button
+                x:Name="BtnCancel"
+                Width="100"
+                Click="BtnCancel_Click"
+                Content="取消" />
+        </StackPanel>
+        <StackPanel
+            Margin="10"
+            HorizontalAlignment="Center"
+            Orientation="Horizontal">
+            <CheckBox
+                x:Name="HideExpandCollapse"
+                Checked="HideExpandCollapse_Checked"
+                Content="Hide Expand Collapse"
+                IsChecked="True"
+                Unchecked="HideExpandCollapse_Unchecked" />
+            <CheckBox
+                x:Name="HideSerachBox"
+                Checked="HideSerachBox_Checked"
+                Content="Hide Serach Box"
+                IsChecked="True"
+                Unchecked="HideSerachBox_Unchecked" />
+            <CheckBox
+                x:Name="HideTreeViewNavigation"
+                Checked="HideTreeViewNavigation_Checked"
+                Content="Hide TreeView Navigation"
+                IsChecked="True"
+                Unchecked="HideTreeViewNavigation_Unchecked" />
+        </StackPanel>
+        <StackPanel
+            Margin="10"
+            HorizontalAlignment="Center"
+            Orientation="Horizontal">
+            <CheckBox
+                x:Name="HideUnitColumn"
+                Checked="HideUnitColumn_Checked"
+                Content="HideUnitColumn"
+                IsChecked="True"
+                Unchecked="HideUnitColumn_Unchecked" />
+            <CheckBox
+                x:Name="HideMinColumn"
+                Checked="HideMinColumn_Checked"
+                Content="HideMinColumn"
+                IsChecked="True"
+                Unchecked="HideMinColumn_Unchecked" />
+            <CheckBox
+                x:Name="HideMaxColumn"
+                Checked="HideMaxColumn_Checked"
+                Content="HideMaxColumn"
+                IsChecked="True"
+                Unchecked="HideMaxColumn_Unchecked" />
+            <CheckBox
+                x:Name="HideDescColumn"
+                Checked="HideDescColumn_Checked"
+                Content="HideDescColumn"
+                IsChecked="True"
+                Unchecked="HideDescColumn_Unchecked" />
+            <CheckBox
+                x:Name="HideDescNoColumn"
+                Checked="HideDescNoColumn_Checked"
+                Content="HideDescNoColumn"
+                IsChecked="True"
+                Unchecked="HideDescNoColumn_Unchecked" />
+        </StackPanel>
+    </StackPanel>
+</Window>

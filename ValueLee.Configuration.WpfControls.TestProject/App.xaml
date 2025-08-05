@@ -1,0 +1,45 @@
+﻿<Application
+    x:Class="ValueLee.Configuration.WpfControls.TestProject.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:ValueLee.Configuration.WpfControls.TestProject"
+    xmlns:xcat="http://schemas.xceed.com/wpf/xaml/avalondock/themes"
+    xmlns:xcct="http://schemas.xceed.com/wpf/xaml/material/design/themes"
+    xmlns:xcdt="http://schemas.xceed.com/wpf/xaml/datagrid/themes"
+    xmlns:xclt="http://schemas.xceed.com/wpf/xaml/listbox/themes"
+    xmlns:xctt="http://schemas.xceed.com/wpf/xaml/toolkit/themes"
+    StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+
+            <!--<ResourceDictionary.MergedDictionaries>
+
+                --><!--  Core Controls  --><!--
+
+                <xcct:MaterialDesignResourceDictionary
+                    AccentColor="LightGreen"
+                    IsDark="False"
+                    LicenseKey="XPT30-WRS9R-HZ10H-4GWA"
+                    PrimaryColor="Blue" />
+
+                --><!--  Toolkit Controls  --><!--
+
+                <xctt:MaterialDesignResourceDictionary />
+
+                --><!--  ListBox Controls  --><!--
+
+                <xclt:MaterialDesignResourceDictionary />
+
+                --><!--  DataGrid Controls  --><!--
+
+                <xcdt:MaterialDesignResourceDictionary />
+
+                --><!--  AvalonDock Controls  --><!--
+
+                <xcat:MaterialDesignResourceDictionary />
+
+            </ResourceDictionary.MergedDictionaries>-->
+
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<innerconfig value="ValidationRule1" name="ValidationRule" />
+	<innerconfig value="OptionsSource1" name="OptionsSource" />
+	<config name="System" display="">
+		<config value="false" name="IsSimulatorMode" description="" max="" min="" options="" unit="" type="Boolean" restart="true" browseable="true" />
+		<config value="false" name="IsATMMode" description="" max="" min="" options="" unit="" type="Boolean" />
+		<config value="3" name="CycleCount" description="" max="" min="" options="" unit="" type="Integer" />
+		<config value="false" name="BypassInterlock" description="Bypass Interlock" max="0" min="0" options="" unit="" type="Boolean" />
+		<config value="1000" name="DataCollectionInterval" description="" max="99999" min="20" options="" unit="" type="Integer" />
+		<config value="60" name="LogsSaveDays" description="" max="60000" min="0" options="" unit="" type="Integer" />
+		<config value="5" name="DiskFreeSpaceAlarmTolerance" description="" max="4096" min="1" options="" unit="G" type="Decimal" />
+		<config value="CD" name="MonitoredDriveLetter" description="" max="" min="" options="" unit="" type="String" />
+		<config name="LogsFolder" value="C:\Logs"  type="Folder" />
+		<config name="DataReport" value="C:\data.csv"  type="File" />
+		<config name="AlarmLight" value="#FFFFFF"  type="Color" />
+		<config name="ResetDate" value="2025-05-06 08:00:00"  type="DateTime" />
+		<config name="Scheduler">
+			<config value="15" name="WaitLoadTimeOut" description="" max="" min="" options="" unit="s" type="Decimal" />
+		</config>
+	</config>
+</root>

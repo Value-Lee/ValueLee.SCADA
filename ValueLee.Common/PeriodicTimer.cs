@@ -17,6 +17,10 @@ namespace ValueLee.Common
 
         public PeriodicTimer(int periodMS)
         {
+            if(periodMS <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(periodMS), "Period must be greater than zero.");
+            }
             _locker = new object();
             _periodMS = periodMS;
         }

@@ -587,7 +587,7 @@ root下可以有多个分类节点。下面有两个配置项`System.CycleCount`
 </root>
 ```
 
-==终极原则是保证每一个数据项的路径在全部数据项中都是唯一的即可。==
+==终极原则是：同一个分类节点下的直接子分类节点的Name不能重复，子数据节点的Name不能重复，进而保证每一个数据项的路径在全部数据项中都是唯一的。==
 
 ### Category node
 
@@ -802,22 +802,27 @@ PrimitiveConfigSource第2个构造方法如下
 可以在内存中提供一个作为默认配置的xml文本，在软件启动后可以正常读取和修改配置项的值，但是软件重启后，所有配置又恢复默认配置，上一次软件运行修改的值被丢弃。也就是说，每次软件启动，使用的都是相同的初始配置。
 
 ```c#
-string xmlDocument = """
+string xmlString = """
     <?xml version="1.0" encoding="utf-8"?>
     <root>
     	<config name="System">
-    	    <innerconfig name="EquipmentModel" value="ICP"/>
     		<config value="3" name="CycleCount" type="Integer"/>
     		<config value="false" name="IsSimulatorMode" type="Boolean"/>
-    		<config name="SetUp">
-    			<config value="5" name="DiskFreeSpaceAlarmTolerance" type="Decimal"/>
-    			<config value="127.0.0.1" name="RemoteIpAddress" type="String"/>
-    		</config>
     	</config>
     </root>
     """;
 
-PrimitiveConfigSource source = new PrimitiveConfigSource(xmlString);
+using PrimitiveConfigSource source = new PrimitiveConfigSource(xmlString);
+
+Console.WriteLine(source.GetValue<int>("System.CycleCount"));
+Console.WriteLine(source.GetValue<bool>("System.IsSimulatorMode"));
+
+source.SetValue("System.CycleCount", 111);
+source.SetValue("System.IsSimulatorMode", true);
+
+Console.WriteLine(source.GetValue<int>("System.CycleCount"));
+Console.WriteLine(source.GetValue<bool>("System.IsSimulatorMode"));
+
 // PrimitiveConfigSource source = new PrimitiveConfigSource(File.ReadAllText("SetUp.xml")); // SetUp.xml作为软件初启动的默认配置，存放在应用程序目录下，可根据需要编辑修改。
 ```
 

@@ -21,7 +21,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValueLee.LivingFSM", "Value
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValueLee.HardwareUnits", "ValueLee.HardwareUnits\ValueLee.HardwareUnits.csproj", "{268D2EF2-9CF2-4ECE-8453-9894361721B2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValueLee.Common.TestProject", "ValueLee.Common.TestProject\ValueLee.Common.TestProject.csproj", "{BEADD095-D5A0-43D1-B21C-236D612D1317}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValueLee.Common.TestProject", "ValueLee.Common.TestProject\ValueLee.Common.TestProject.csproj", "{43712BA2-B35E-4F1B-9D81-763868E8EB43}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -65,10 +65,10 @@ Global
 		{268D2EF2-9CF2-4ECE-8453-9894361721B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{268D2EF2-9CF2-4ECE-8453-9894361721B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{268D2EF2-9CF2-4ECE-8453-9894361721B2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BEADD095-D5A0-43D1-B21C-236D612D1317}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BEADD095-D5A0-43D1-B21C-236D612D1317}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BEADD095-D5A0-43D1-B21C-236D612D1317}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BEADD095-D5A0-43D1-B21C-236D612D1317}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43712BA2-B35E-4F1B-9D81-763868E8EB43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43712BA2-B35E-4F1B-9D81-763868E8EB43}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43712BA2-B35E-4F1B-9D81-763868E8EB43}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43712BA2-B35E-4F1B-9D81-763868E8EB43}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

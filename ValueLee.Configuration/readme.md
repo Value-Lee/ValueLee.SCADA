@@ -1,4 +1,4 @@
-﻿## Motivation and Function
+## Motivation and Function
 
 **.net framework app.config**
 
@@ -589,50 +589,47 @@ root下可以有多个分类节点。下面有两个配置项`System.CycleCount`
 
 ==终极原则是：同一个分类节点下的直接子分类节点的Name不能重复，子数据节点的Name不能重复，进而保证每一个数据项的路径在全部数据项中都是唯一的。==
 
-### Category node
+## Node
 
-> 不可省略的意思是，必须在xml中config指定该属性且值不能是空白。可省略的意思是可以在xml的config不写该属性或值是空白字符。
+> 必须配置的意思是，必须在xml中config指定该属性且值不能是空白。可选配置的意思是可以在xml的config不写该属性或值是空白字符。
 >
-> 红色标记的属性是用于做可视化修改值的UI时使用的，如果只是在后台使用简单的读写功能，则无需理会这些属性。
+> 绿色标记的属性是用于做可视化修改值的UI时使用的，如果只是在后台使用简单的读写功能，则无需理会这些属性。
+>
+> 橙色标记
+
+### Category node
 
 `<config name="System">`
 
-支持以下2个属性
-
-- ==name== 分类节点标识，不可省略
-- `display` 可省略，默认值与name相同。
-- `visible` 节点下的数据项是否在UI可见。可省略，默认值是true。
-- `Enable` 节点下的数据项是否可在UI更改。可省略，默认值是true。
+| Attribute                         | Description                                    | Default Value                       |
+| --------------------------------- | ---------------------------------------------- | ----------------------------------- |
+| <font color=red>name</font>       | 必须配置，分类节点的ID                         |                                     |
+| <font color=green> display</font> | 可选配置，默认值与name相同。For UI             | same as <font color=red>name</font> |
+| <font color=green> visible</font> | 可选配置，节点下的数据项是否在UI可见。For UI   | true                                |
+| <font color=green> enable</font>  | 可选配置，节点下的数据项是否可在UI更改。For UI | true                                |
 
 ### Data node
 
-- ==name== 数据节点的标识。不可省略，必须保证在同一个父类别节点下的所有节点之间唯一。
-- ==value==  数据项的值。不可省略。
-- ==type== 数据项的值类型，枚举：
-  - `Boolean`   value文本可被解读成C#的bool类型。
+`<config name="RemoteIpAddress" value="127.0.0.1" type="String"/>`
 
-  - `Integer`    value文本可被解读成C#的byte，short，int，long，double，float，decimal。
+| Attribute                            | Description                                                  | Default Value                       |
+| ------------------------------------ | ------------------------------------------------------------ | ----------------------------------- |
+| <font color=red>name</font>          | 必须配置，数据节点的ID                                       |                                     |
+| <font color=red>value</font>         | 必须配置，数据项的值                                         |                                     |
+| <font color=red>type</font>          | 必须配置，数据项的值类型。                                   |                                     |
+| <font color=orange>max</font>        | 可选配置，数据项的允许值的最大边界。此属性只有`type`是`Integer` `Decimal`才有效。 | decimal.MaxValue                    |
+| <font color=orange>min</font>        | 可选配置，数据项的允许值的最小边界。此属性只有`type`是`Integer` `Decimal`才有效。 | decimal.MinValue                    |
+| <font color=orange>regex</font>      | 可选配置，正则表达式。SetValue的新值实参最终转换成的字符串，必须匹配此正则表达式，否则拒绝本次修改。 |                                     |
+| <font color=orange>regexnote</font>  | 可选配置，regex的注解。正则表达式难以理解，可以用此项做注解，不是必须的。在程序中设置值时，如果正则表达式校验失败，抛出的异常信息是regexNote,如果未配置regexNote，异常信息是regex. | string.Empty                        |
+| <font color=orange>options</font>    | 允许的取值集合。用; 隔开，如 options="COM1;COM2;COM3" .  SetValue(string config，object newValue)，会先把newValue转换成type指定的类型，再将options的每一项转换成type指定的类型，这时候才开始检查options中是否有元素等于newValue，如果没有，会拒绝本次修改。举例：newValue是字符串"0xA"，Options字符串列表是["1","10","100"],设置值操作会成功，字符串"0xA"转换成整数是10，字符串"10"转换成整数是10，所以Options包含"0xA"。 | empty array                         |
+| <font color=green>display</font>     | 可选配置，在UI显示的文字。For UI                             | same as <font color=red>name</font> |
+| <font color=green>description</font> | 可选配置，数据项的描述。For UI                               | string.Empty                        |
+| <font color=green>unit</font>        | 可选配置，数据项的单位，如 kg，Torr，mm，℃ ...... For UI     | string.Empty                        |
+| <font color=green>visible</font>     | 可选配置，数据项是否在UI可见。For UI                         | true                                |
+| <font color=green>enable</font>      | 可选配置，数据项是否可在UI更改。For UI                       | true                                |
+| <font color=green>restart</font>     | 可选配置，修改数据项的值后是否需要重启App。For UI            | false                               |
 
-  - `Decimal`   value文本可被解读成C#的double，float，decimal。
-
-  - `String`  value文本可被解读成C#的string。
-- ==max== 数据项的允许值的最大边界。此属性只有`type`是`Integer` `Decimal`才有效。可省略，默认值是decimal.MaxValue。
-- ==min== 数据项的允许值的最小边界。此属性只有`type`是`Integer` `Decimal`才有效。可省略，默认值是decimal.MinValue。
-- ==options== 允许的取值集合。用; 隔开，如 options="COM1;COM2;COM3" .  SetValue(string config，object newValue)，会先把newValue转换成type指定的类型，再将options的每一项转换成type指定的类型，这时候才开始检查options中是否有元素等于newValue，如果没有，会拒绝本次修改。举例：newValue是字符串"0xA"，Options字符串列表是["1","10","100"],设置值操作会成功，字符串"0xA"转换成整数是10，字符串"10"转换成整数是10，所以Options包含"0xA"。
-- ==regex== 正则表达式。SetValue(string config，object newValue),`newValue.ToString()`字符串必须匹配此正则表达式，否则拒绝本次修改。
-- ==regexNote== ==regex的注解==。正则表达式难以理解，可以用此项做注解，不是必须的。在程序中设置值时，如果正则表达式校验失败，抛出的异常信息是regexNote,如果未配置regexNote，异常信息是regex.
-- `display` 可省略，默认值与name相同。
-- `description` 数据项的描述。可省略，默认值是string.Empty。
-- `unit` 数据项的单位，如 kg，Torr，mm，℃ ...... 可省略，默认值是string.Empty。
-- `visible` 数据项是否在UI可见。可省略，默认值是true。
-- `Enable` 数据项是否可在UI更改。可省略，默认值是true。
-- `restart` 修改数据项的值后是否需要重启App才生效。可省略，默认值是false。
-
-#### options
-假设设置的新值是object obj，
-
-type是ValueType.String时，匹配规则是 `options.Contains(obj.ToString())`
-
+### options
 type是ValueType.Integer时，匹配规则是（ValueType.Decimal时类似）
 
 ```c#
@@ -655,17 +652,50 @@ if (!longOptions.Contains(@long))
 }
 ```
 
-`Regex.IsMatch(decimal.Parse(obj).ToString(), regex)`
+type是ValueType.Boolean时，options决定true和false时在UI显示的文本。如options="on;off"，true显示on，false显示off。如果不需要UI界面，无需为ValueType.Boolean配置options。
 
-> type是ValueType.Boolean时，options决定true和false时在UI显示的文本。如options="on;off"，true显示on，false显示off。如果不需要UI界面，无需为ValueType.Boolean配置options。
+### regex
 
-#### regex
+> regex只对String，Decimal，Integer校验，其他类型绕过正则表达式校验。
 
-假设设置的新值是object obj，
+```c#
+private string Convert2String(object value)
+{
+    var valueType = value.GetType();
+    if (valueType == typeof(DateTime))
+    {
+        return ((DateTime)value).ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+    }
+    else if (valueType == typeof(System.Drawing.Color))
+    {
+        return "#" + ((System.Drawing.Color)value).ToArgb().ToString("X8", CultureInfo.InvariantCulture);
+    }
+    else if (valueType == typeof(FileInfo))
+    {
+        return ((FileInfo)value).FullName;
+    }
+    else if (valueType == typeof(DirectoryInfo))
+    {
+        return ((DirectoryInfo)value).FullName;
+    }
+    else
+    {
+        return value.ToString();
+    }
+}
+```
 
-type是ValueType.String时，匹配规则是 `Regex.IsMatch(obj.ToString(), regex)`
+type是ValueType.String时，匹配规则是 `Regex.IsMatch(Convert2String(newValue), regex)`。
 
-type是ValueType.Integer或ValueType.Decimal时，匹配规则是 `Regex.IsMatch(decimal.Parse(obj).ToString(), regex)`，如`^([02468]|[1-9]\d*[02468])$`,限制是偶数。
+example:
+
+`^((2((5[0-5])|([0-4]\d)))|([0-1]?\d{1,2}))(\.((2((5[0-5])|([0-4]\d)))|([0-1]?\d{1,2}))){3}$`
+
+type是ValueType.Integer或ValueType.Decimal时，匹配规则是 `Regex.IsMatch(decimal.Parse(Convert2String(newValue)).ToString(), regex)`，也就是说，数字的字符串形式有多种，比如十六进制，科学计数法等，但是在进行正则表达式匹配时，总是先转换成最简单的十进制的字符串再去匹配。
+
+example: 
+
+`^([02468]|[1-9]\d*[02468])$`,限制是偶数。
 
 ## CustomizeConfigItemValidationRule & CustomizeConfigItemOptionsSource
 
@@ -825,5 +855,7 @@ Console.WriteLine(source.GetValue<bool>("System.IsSimulatorMode"));
 
 // PrimitiveConfigSource source = new PrimitiveConfigSource(File.ReadAllText("SetUp.xml")); // SetUp.xml作为软件初启动的默认配置，存放在应用程序目录下，可根据需要编辑修改。
 ```
+
+## Awesome Example
 
 ## TODO

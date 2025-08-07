@@ -611,7 +611,7 @@ root下可以有多个分类节点。下面有两个配置项`System.CycleCount`
 
 ### Data node
 
-`<config name="RemoteIpAddress" value="127.0.0.1" type="String" max="" min="" regex="" regexnote="" options="127.0.0.1;192.168.2.22;172.176.1.1" description="服务器的IP地址" unit=""  visible="true" enable="true" restart="true" />`
+`<config name="RemoteIpAddress" value="127.0.0.1" type="String" max="" min="" regex="^((2((5[0-5])|([0-4]\d)))|([0-1]?\d{1,2}))(\.((2((5[0-5])|([0-4]\d)))|([0-1]?\d{1,2}))){3}$" regexnote="必须是正确的IP地址格式" options="127.0.0.1;192.168.2.22;172.176.1.1" description="服务器的IP地址" unit=""  visible="true" enable="true" restart="true" />`
 
 | Attribute                            | Description                                                  | Default Value                       |
 | ------------------------------------ | ------------------------------------------------------------ | ----------------------------------- |

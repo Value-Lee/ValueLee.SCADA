@@ -10,7 +10,7 @@ namespace Nuart.Modbus.TestApp.Controls
 {
     public class IntTypeConverter : TypeConverter
     {
-        public bool AllowHex { get; set; }
+        public bool AllowHex { get; set; } 
         public IntTypeConverter()
         {
             AllowHex = true;

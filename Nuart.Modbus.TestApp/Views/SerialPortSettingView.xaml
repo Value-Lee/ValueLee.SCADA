@@ -1,0 +1,103 @@
+﻿<UserControl
+    x:Class="Nuart.Modbus.TestApp.Views.SerialPortSettingView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="clr-namespace:Nuart.Modbus.TestApp.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:local="clr-namespace:Nuart.Modbus.TestApp.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewmodels="clr-namespace:Nuart.Modbus.TestApp.ViewModels"
+    xmlns:xp="clr-namespace:XamlPearls;assembly=XamlPearls"
+    Margin="10,5,10,10"
+    d:DataContext="{d:DesignInstance viewmodels:SerialPortSettingViewModel}"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <converters:StopBitsConverter x:Key="StopBitsConverter" />
+        <converters:ParityConverter x:Key="ParityConverter" />
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto" />
+            <ColumnDefinition />
+            <ColumnDefinition Width="auto" />
+            <ColumnDefinition />
+            <ColumnDefinition Width="auto" />
+            <ColumnDefinition />
+            <ColumnDefinition Width="auto" />
+            <ColumnDefinition />
+            <ColumnDefinition Width="auto" />
+        </Grid.ColumnDefinitions>
+
+        <TextBlock
+            Grid.Row="0"
+            Grid.Column="0"
+            Margin="0,0,15,0"
+            VerticalAlignment="Center"
+            Text="Port:" />
+        <TextBlock
+            Grid.Row="0"
+            Grid.Column="2"
+            Margin="0,0,15,0"
+            VerticalAlignment="Center"
+            Text="Baud Rate:" />
+        <TextBlock
+            Grid.Row="0"
+            Grid.Column="4"
+            Margin="0,0,15,0"
+            VerticalAlignment="Center"
+            Text="Parity:" />
+        <TextBlock
+            Grid.Row="0"
+            Grid.Column="6"
+            Margin="0,0,15,0"
+            VerticalAlignment="Center"
+            Text="Stop Bits:" />
+        <ComboBox
+            Grid.Row="0"
+            Grid.Column="1"
+            MinWidth="50"
+            Margin="0,0,20,0"
+            VerticalAlignment="Center"
+            HorizontalContentAlignment="Center"
+            ItemsSource="{Binding PortOptions}"
+            SelectedItem="{Binding PortName}" />
+        <ComboBox
+            Grid.Row="0"
+            Grid.Column="3"
+            MinWidth="50"
+            Margin="0,0,20,0"
+            VerticalAlignment="Center"
+            HorizontalContentAlignment="Center"
+            ItemsSource="{Binding BaudRateOptions}"
+            SelectedItem="{Binding BaudRate}" />
+        <ComboBox
+            Grid.Row="0"
+            Grid.Column="5"
+            MinWidth="50"
+            Margin="0,0,20,0"
+            VerticalAlignment="Center"
+            HorizontalContentAlignment="Center"
+            ItemsSource="{Binding ParityOptions}"
+            SelectedItem="{Binding Parity, Converter={StaticResource ParityConverter}}" />
+        <ComboBox
+            Grid.Row="0"
+            Grid.Column="7"
+            MinWidth="50"
+            VerticalAlignment="Center"
+            HorizontalContentAlignment="Center"
+            ItemsSource="{Binding StopBitsOptions}"
+            SelectedItem="{Binding StopBits, Converter={StaticResource StopBitsConverter}}" />
+        <StackPanel
+            Grid.Row="0"
+            Grid.Column="8"
+            Margin="50,0"
+            PreviewMouseDown="StackPanel_PreviewMouseDown">
+            <RadioButton Content="RTU" IsChecked="{Binding IsRtuMode}" />
+            <RadioButton Content="ASC" IsChecked="{Binding IsAscMode}" />
+        </StackPanel>
+    </Grid>
+</UserControl>

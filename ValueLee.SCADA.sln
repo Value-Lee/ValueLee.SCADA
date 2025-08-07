@@ -25,7 +25,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValueLee.Common.TestProject
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValueLee.Nuart", "ValueLee.Nuart\ValueLee.Nuart.csproj", "{B5B43B0D-F5AB-4EE5-8418-86FF932829C3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nuart.Modbus.TestApp", "Nuart.Modbus.TestApp\Nuart.Modbus.TestApp.csproj", "{92D136B4-ED14-B561-AAFA-D5B6DDCE82AC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValueLee.Nuart.Modbus.TestApp", "Nuart.Modbus.TestApp\ValueLee.Nuart.Modbus.TestApp.csproj", "{92D136B4-ED14-B561-AAFA-D5B6DDCE82AC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

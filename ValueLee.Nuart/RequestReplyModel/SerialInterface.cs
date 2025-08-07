@@ -289,7 +289,7 @@ namespace Nuart.RequestReplyModel
             }
             finally
             {
-                // 放到finally，避免try块种出现异常的情况下Reset()一直阻塞。
+                // 放到finally，避免try块中出现异常的情况下Reset()一直阻塞。
                 if (_resetFlag)
                 {
                     _dataReceivedBuffer.Clear();

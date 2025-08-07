@@ -185,21 +185,6 @@ namespace ValueLee.Configuration
 
         public ConfigNode[] Nodes { get; }
 
-        public ConfigNode GetConfigNode(string path)
-        {
-            if (!string.IsNullOrWhiteSpace(path) && Nodes != null && Nodes.Length > 0)
-            {
-                foreach (var node in Nodes)
-                {
-                    if (ConfigNode.Find(path, false, node, out _, out ConfigNode configNode))
-                    {
-                        return configNode;
-                    }
-                }
-            }
-            return null;
-        }
-
         public string XmlString
         {
             private set; get;
@@ -225,6 +210,21 @@ namespace ValueLee.Configuration
                 _disposed = true;
             }
 #endif
+        }
+
+        public ConfigNode GetConfigNode(string path)
+        {
+            if (!string.IsNullOrWhiteSpace(path) && Nodes != null && Nodes.Length > 0)
+            {
+                foreach (var node in Nodes)
+                {
+                    if (ConfigNode.Find(path, false, node, out _, out ConfigNode configNode))
+                    {
+                        return configNode;
+                    }
+                }
+            }
+            return null;
         }
 
         protected string GetInnerConfigValue(string name)

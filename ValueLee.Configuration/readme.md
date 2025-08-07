@@ -591,15 +591,16 @@ root下可以有多个分类节点。下面有两个配置项`System.CycleCount`
 
 ## Node
 
-> 必须配置的意思是，必须在xml中config指定该属性且值不能是空白。可选配置的意思是可以在xml的config不写该属性或值是空白字符。
+> 红色标记的属性是必须配置的意思，必须在xml中config指定该属性且值不能是空白。可选配置的意思是可以在xml的config不写该属性或值是空白字符。
 >
-> 绿色标记的属性是用于做可视化修改值的UI时使用的，如果只是在后台使用简单的读写功能，则无需理会这些属性。
+> 橙色标记的属性是可选配置，用于校验和限定配置项的取值，根据需求决定是否配置。
 >
-> 橙色标记
+> 绿色标记的属性是可选配置，用于做可视化修改值的UI时使用的，如果只是在后台使用简单的读写功能，则无需理会这些属性。
+>
 
 ### Category node
 
-`<config name="System">`
+`<config name="System" display="系统" visible="true" enable="true" />`
 
 | Attribute                         | Description                                    | Default Value                       |
 | --------------------------------- | ---------------------------------------------- | ----------------------------------- |
@@ -610,7 +611,7 @@ root下可以有多个分类节点。下面有两个配置项`System.CycleCount`
 
 ### Data node
 
-`<config name="RemoteIpAddress" value="127.0.0.1" type="String"/>`
+`<config name="RemoteIpAddress" value="127.0.0.1" type="String" max="" min="" regex="" regexnote="" options="127.0.0.1;192.168.2.22;172.176.1.1" description="服务器的IP地址" unit=""  visible="true" enable="true" restart="true" />`
 
 | Attribute                            | Description                                                  | Default Value                       |
 | ------------------------------------ | ------------------------------------------------------------ | ----------------------------------- |
@@ -619,9 +620,9 @@ root下可以有多个分类节点。下面有两个配置项`System.CycleCount`
 | <font color=red>type</font>          | 必须配置，数据项的值类型。                                   |                                     |
 | <font color=orange>max</font>        | 可选配置，数据项的允许值的最大边界。此属性只有`type`是`Integer` `Decimal`才有效。 | decimal.MaxValue                    |
 | <font color=orange>min</font>        | 可选配置，数据项的允许值的最小边界。此属性只有`type`是`Integer` `Decimal`才有效。 | decimal.MinValue                    |
-| <font color=orange>regex</font>      | 可选配置，正则表达式。SetValue的新值实参最终转换成的字符串，必须匹配此正则表达式，否则拒绝本次修改。 |                                     |
+| <font color=orange>regex</font>      | 可选配置，正则表达式。SetValue的新值实参最终转换成的字符串，必须匹配此正则表达式，否则拒绝本次修改。 | string.Empty                        |
 | <font color=orange>regexnote</font>  | 可选配置，regex的注解。正则表达式难以理解，可以用此项做注解，不是必须的。在程序中设置值时，如果正则表达式校验失败，抛出的异常信息是regexNote,如果未配置regexNote，异常信息是regex. | string.Empty                        |
-| <font color=orange>options</font>    | 允许的取值集合。用; 隔开，如 options="COM1;COM2;COM3" .  SetValue(string config，object newValue)，会先把newValue转换成type指定的类型，再将options的每一项转换成type指定的类型，这时候才开始检查options中是否有元素等于newValue，如果没有，会拒绝本次修改。举例：newValue是字符串"0xA"，Options字符串列表是["1","10","100"],设置值操作会成功，字符串"0xA"转换成整数是10，字符串"10"转换成整数是10，所以Options包含"0xA"。 | empty array                         |
+| <font color=orange>options</font>    | 允许的取值集合。用; 隔开，如 options="COM1;COM2;COM3" .      | empty array                         |
 | <font color=green>display</font>     | 可选配置，在UI显示的文字。For UI                             | same as <font color=red>name</font> |
 | <font color=green>description</font> | 可选配置，数据项的描述。For UI                               | string.Empty                        |
 | <font color=green>unit</font>        | 可选配置，数据项的单位，如 kg，Torr，mm，℃ ...... For UI     | string.Empty                        |
@@ -630,7 +631,20 @@ root下可以有多个分类节点。下面有两个配置项`System.CycleCount`
 | <font color=green>restart</font>     | 可选配置，修改数据项的值后是否需要重启App。For UI            | false                               |
 
 ### options
-type是ValueType.Integer时，匹配规则是（ValueType.Decimal时类似）
+
+> options只对Boolean，Integer，Decimal，String有效，其他类型会绕过options机制。
+
+example1: 限定String类型的串口号配置值为COM1，COM2，COM3之一。
+
+< name="Port" value="COM1" type="String" options="COM1;COM2;COM3" />
+
+example2：限定Integer类型的重试次数配置值为1，10，100之一。
+
+< name="RetryTimes" value="1" type="Integer" options="1;10;100" />
+
+SetValue(string config，object newValue)，会先把newValue转换成type指定的类型，再将options的每一项转换成type指定的类型，这时候才开始检查options中是否有元素等于newValue，如果没有，会拒绝本次修改。举例：newValue是字符串"0xA"，Options字符串列表是["1","10","100"],设置值操作会成功，字符串"0xA"转换成整数是10，字符串"10"转换成整数是10，所以Options包含"0xA"。
+
+type是ValueType.Integer时，匹配规则是（`ValueType.Decimal与Integer类似`）
 
 ```c#
 var longOptions = new List<long>();
@@ -705,7 +719,7 @@ PrimitiveConfigSource有两个虚方法
 
 `CustomizeConfigItemValidationRule` 可以定制数据项的校验规则。\<config>节点只能用min,max,regex来校验，当这3个手段无法满足校验需求时，可以通过重写此方法再额外添加一些校验规则。
 
-`CustomizeConfigItemOptionsSource` 可以定制数据项的限定值选项。\<config>节点可以用options来限定数据项允许的取值集合，当options无法很好的指定集合时，可以通过重写此方法指定允许的取值集合。注意：此方法返回的集合会覆盖掉\<config>的options，即导致xml中的options无效。
+`CustomizeConfigItemOptionsSource` 可以定制数据项的限定值选项。\<config>节点可以用options来限定数据项允许的取值集合，当options无法很好的指定集合时，可以通过重写此方法指定允许的取值集合。注意：此方法返回的集合会覆盖掉\<config>的options，即导致xml中配置的options无效。
 
 
 

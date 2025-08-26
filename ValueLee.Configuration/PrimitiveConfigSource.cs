@@ -1052,16 +1052,17 @@ namespace ValueLee.Configuration
             #region Regular Expression Validation
 
             var regex = _configItems[configItem].Regex;
+            var vtype = _configItems[configItem].Type;
             if (!string.IsNullOrWhiteSpace(regex))
             {
-                if ((_configItems[configItem].Type == ValueType.String ||
-                    _configItems[configItem].Type == ValueType.File ||
-                    _configItems[configItem].Type == ValueType.Folder)
+                if ((vtype == ValueType.String ||
+                    vtype == ValueType.File ||
+                    vtype == ValueType.Folder)
                     && !Regex.IsMatch(strValue, regex))
                 {
                     throw new ArgumentException(ExceptionHelper.GetFormattedString("ArgumentException_RegexValidation", strValue, _configItems[configItem].RegexNote, configItem));
                 }
-                else if (_configItems[configItem].Type == ValueType.Integer || _configItems[configItem].Type == ValueType.Decimal)
+                else if (vtype == ValueType.Integer || vtype == ValueType.Decimal)
                 {
                     if (Utility.TryParse2Decimal(strValue, out number))
                     {

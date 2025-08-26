@@ -4,16 +4,17 @@ using System.Diagnostics;
 using System.IO.Ports;
 using System.Linq;
 using System.Threading;
+using ValueLee.Common;
+using ValueLee.Nuart;
 
 namespace Nuart.RequestReplyModel
 {
-    public sealed class SerialInterface<TReceiveFilter> : ISerialInterface, IDisposable where TReceiveFilter : IReceiveFilter, new()
+    public sealed class SerialPort<TReceiveFilter> : ISerialPort, ITimer, IDisposable where TReceiveFilter : IReceiveFilter, new()
     {
         #region Fields
 
         private readonly List<byte> _dataReceivedBuffer;
         private readonly AutoResetEvent _resetPortEvent;
-        private readonly Timer _timer;
         private readonly object _transmissionLocker;
         private readonly AutoResetEvent _waitResponseEvent;
         private byte[] _completedFrame;
@@ -27,30 +28,31 @@ namespace Nuart.RequestReplyModel
         private bool _resetRtsEnable;
         private StopBits _resetStopBits;
         private SerialPort _serialPort;
-        private int interval;
         private TReceiveFilter receiveFilter;
+
+        ValueLee.Common.PeriodicTimer ITimer.PeriodicTimer { get; set; }
 
         #endregion Fields
 
         #region Constructors
 
-        public SerialInterface(string portName) : this(portName, 9600)
+        internal SerialPort(string portName) : this(portName, 9600)
         {
         }
 
-        public SerialInterface(string portName, int baudRate) : this(portName, baudRate, Parity.None, StopBits.One)
+        internal SerialPort(string portName, int baudRate) : this(portName, baudRate, Parity.None, StopBits.One)
         {
         }
 
-        public SerialInterface(string portName, int baudRate, Parity parity, StopBits stopBits) : this(portName, baudRate, parity, stopBits, 8)
+        internal SerialPort(string portName, int baudRate, Parity parity, StopBits stopBits) : this(portName, baudRate, parity, stopBits, 8)
         {
         }
 
-        public SerialInterface(string portName, int baudRate, Parity parity, StopBits stopBits, int dataBits) : this(portName, baudRate, parity, stopBits, dataBits, false, Handshake.None)
+        internal SerialPort(string portName, int baudRate, Parity parity, StopBits stopBits, int dataBits) : this(portName, baudRate, parity, stopBits, dataBits, false, Handshake.None)
         {
         }
 
-        public SerialInterface(string portName, int baudRate, Parity parity, StopBits stopBits, int dataBits, bool rtsEnable, Handshake handshake)
+        internal SerialPort(string portName, int baudRate, Parity parity, StopBits stopBits, int dataBits, bool rtsEnable, Handshake handshake)
         {
             _resetPortName = portName;
             _resetBaudRate = baudRate;
@@ -67,9 +69,6 @@ namespace Nuart.RequestReplyModel
             _serialPort = new SerialPort(portName, baudRate, parity, dataBits, stopBits);
             _serialPort.RtsEnable = rtsEnable;
             _serialPort.Handshake = handshake;
-            interval = 25;
-            _timer = new Timer(CallBack);
-            _timer.Change(0, Timeout.Infinite);
         }
 
         #endregion Constructors
@@ -110,9 +109,7 @@ namespace Nuart.RequestReplyModel
         public Handshake Handshake => _serialPort.Handshake;
 
         public Parity Parity => _serialPort.Parity;
-
         public string PortName => _serialPort.PortName;
-
         public int RecvBuffLength => _dataReceivedBuffer.Count;
 
         /// <summary>
@@ -121,6 +118,79 @@ namespace Nuart.RequestReplyModel
         public bool RtsEnable => _serialPort.RtsEnable;
 
         public StopBits StopBits => _serialPort.StopBits;
+
+        void ITimer.RecvData()
+        {
+            try
+            {
+                // ① 如果串口未打开，则打开串口
+                if (!_serialPort.IsOpen)
+                {
+                    _serialPort.Open();
+                    _serialPort.ReadTimeout = 100;
+                }
+
+                // ② 如果需要,会重置串口
+                if (_resetFlag)
+                {
+                    return;
+                }
+
+                // ③ 如果OS Buffer有数据，则全部读出来
+                var bytesToRead = _serialPort.BytesToRead;
+                if (bytesToRead > 0)
+                {
+                    var temp = new byte[bytesToRead];
+                    int count = _serialPort.Read(temp, 0, temp.Length); // Read不会阻塞，因为肯定有数据。
+                    if (count > 0) // 缓存区有N个字节，但实际可能只读到(N-x)个字节(0<=x<=N)
+                    {
+                        var data = temp.Take(count).ToArray();
+                        _dataReceivedBuffer.AddRange(data);
+                        DataRead?.Invoke(new SerialEventArgs<byte[]>(data, Tag, PortName, BaudRate, DataBits, StopBits, Parity, RtsEnable, Handshake));
+                    }
+                }
+                // ④ 从应用层接收缓存解析出完整帧。如果有完整帧，会执行帧处理事件
+                bool success = receiveFilter.IsCompletedFrame(_lastDataSent, _dataReceivedBuffer.ToArray(), () => _serialPort.BytesToRead > 0);
+                if (success)
+                {
+                    _completedFrame = _dataReceivedBuffer.ToArray();
+                    _waitResponseEvent.Set();
+                    CompletedFrameReceived?.Invoke(new SerialEventArgs<byte[]>(_completedFrame, Tag, PortName, BaudRate, DataBits, StopBits, Parity, RtsEnable, Handshake));
+                    _dataReceivedBuffer.Clear();
+                    LastCompletedFrameResolvedTime = Environment.TickCount;
+                }
+
+                //缓存为空分2种情况：
+                //①.刚解析出一个或多个完整帧。这种情况下，绝大概率几毫秒内不会再接收到一个完整帧甚至不会接收到任何数据，跳出循环可以避免循环条件中不必要的CPU自旋耗时。
+                //②.对方长时间不向己方发送数据。这种情况下，定时任务完全没必要执行自旋等待。
+                if (_dataReceivedBuffer.Count == 0)
+                {
+                    // 本次定时器任务，解析出一个完整帧，或者未接收任何数据，跳出，等待下一个定时器到达。否则，继续在本次定时器任务中解析完整帧
+                    // 根据实际测试，99.999%的情况下，SerialPort.Read会全部读出一个帧，所以几乎总是break，虽然有循环，但是
+                    // 几乎不会发生CPU自旋
+                    return;
+                }
+            }
+            catch (Exception e)
+            {
+                throw new SerialEventArgs<Exception>(e, Tag, PortName, BaudRate, DataBits, StopBits, Parity, RtsEnable, Handshake);
+            }
+            finally
+            {
+                // 放到finally，避免try块中出现异常的情况下Reset()一直阻塞。
+                if (_resetFlag)
+                {
+                    _dataReceivedBuffer.Clear();
+                    _serialPort?.Dispose();
+                    _serialPort = null;
+                    _serialPort = new SerialPort(_resetPortName, _resetBaudRate, _resetParity, _resetDataBits, _resetStopBits);
+                    _serialPort.RtsEnable = _resetRtsEnable;
+                    _serialPort.Handshake = _resetHandshake;
+                    _resetFlag = false;
+                    _resetPortEvent.Set();
+                }
+            }
+        }
 
         #endregion Communication Options
 
@@ -225,93 +295,9 @@ namespace Nuart.RequestReplyModel
             return (int)Math.Ceiling(10000d / BaudRate * byteCount);
         }
 
-        private void CallBack(object state)
-        {
-            try
-            {
-                do
-                {
-                    // ① 如果串口未打开，则打开串口
-                    if (!_serialPort.IsOpen)
-                    {
-                        _serialPort.Open();
-                        _serialPort.ReadTimeout = 100;
-                    }
-
-                    // ② 如果需要,会重置串口
-                    if (_resetFlag)
-                    {
-                        break;
-                    }
-
-                    // ③ 如果OS Buffer有数据，则全部读出来
-                    var bytesToRead = _serialPort.BytesToRead;
-                    if (bytesToRead > 0)
-                    {
-                        var temp = new byte[bytesToRead];
-                        int count = _serialPort.Read(temp, 0, temp.Length); // Read不会阻塞，因为肯定有数据。
-                        if (count > 0) // 缓存区有N个字节，但实际可能只读到(N-x)个字节(0<=x<=N)
-                        {
-                            var data = temp.Take(count).ToArray();
-                            _dataReceivedBuffer.AddRange(data);
-                            DataRead?.Invoke(new SerialEventArgs<byte[]>(data, Tag, PortName, BaudRate, DataBits, StopBits, Parity, RtsEnable, Handshake));
-                        }
-                    }
-                    // ④ 从应用层接收缓存解析出完整帧。如果有完整帧，会执行帧处理事件
-                    bool success = receiveFilter.IsCompletedFrame(_lastDataSent, _dataReceivedBuffer.ToArray(), () => _serialPort.BytesToRead > 0);
-                    if (success)
-                    {
-                        _completedFrame = _dataReceivedBuffer.ToArray();
-                        _waitResponseEvent.Set();
-                        CompletedFrameReceived?.Invoke(new SerialEventArgs<byte[]>(_completedFrame, Tag, PortName, BaudRate, DataBits, StopBits, Parity, RtsEnable, Handshake));
-                        _dataReceivedBuffer.Clear();
-                        LastCompletedFrameResolvedTime = Environment.TickCount;
-                    }
-
-                    //缓存为空分2种情况：
-                    //①.刚解析出一个或多个完整帧。这种情况下，绝大概率几毫秒内不会再接收到一个完整帧甚至不会接收到任何数据，跳出循环可以避免循环条件中不必要的CPU自旋耗时。
-                    //②.对方长时间不向己方发送数据。这种情况下，定时任务完全没必要执行自旋等待。
-                    if (_dataReceivedBuffer.Count == 0)
-                    {
-                        // 本次定时器任务，解析出一个完整帧，或者未接收任何数据，跳出，等待下一个定时器到达。否则，继续在本次定时器任务中解析完整帧
-                        // 根据实际测试，99.999%的情况下，SerialPort.Read会全部读出一个帧，所以几乎总是break，虽然有循环，但是
-                        // 几乎不会发生CPU自旋
-                        break;
-                    }
-
-                    // 操作系统层接收缓存有未读出的数据或5个字节时间之内有新数据到达，则在本次定时任务继续执行上述4个任务。
-                    // (确定还有未处理的数据时，这样做相比于重新等下一次定时器抵达，处理数据更加及时)
-                } while (SpinWait.SpinUntil(() => _serialPort.BytesToRead > 0, (CalculateTransmissionTime(3) > 5 ? 5 : CalculateTransmissionTime(3)) < 2 ? 2 : CalculateTransmissionTime(3) > 5 ? 5 : CalculateTransmissionTime(3))); // 小于2ms时强制置2，大于5ms时强制置5
-            }
-            catch (Exception e)
-            {
-                TimedDataReadingJobThrowException?.Invoke(new SerialEventArgs<Exception>(e, Tag, PortName, BaudRate, DataBits, StopBits, Parity, RtsEnable, Handshake));
-            }
-            finally
-            {
-                // 放到finally，避免try块中出现异常的情况下Reset()一直阻塞。
-                if (_resetFlag)
-                {
-                    _dataReceivedBuffer.Clear();
-                    _serialPort?.Dispose();
-                    _serialPort = null;
-                    _serialPort = new SerialPort(_resetPortName, _resetBaudRate, _resetParity, _resetDataBits, _resetStopBits);
-                    _serialPort.RtsEnable = _resetRtsEnable;
-                    _serialPort.Handshake = _resetHandshake;
-                    _resetFlag = false;
-                    _resetPortEvent.Set();
-                    _timer.Change(TimeSpan.FromMilliseconds(0), Timeout.InfiniteTimeSpan);
-                }
-                else
-                {
-                    _timer.Change(TimeSpan.FromMilliseconds(interval), Timeout.InfiniteTimeSpan);
-                }
-            }
-        }
-
         #region Disposable
 
-        ~SerialInterface()
+        ~SerialPort()
         {
             Dispose(false);
         }
@@ -329,7 +315,6 @@ namespace Nuart.RequestReplyModel
             {
                 _waitResponseEvent?.Dispose();
                 _resetPortEvent?.Dispose();
-                _timer?.Dispose();
                 _serialPort?.Dispose();
             }
         }

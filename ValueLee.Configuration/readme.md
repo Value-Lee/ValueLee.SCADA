@@ -670,7 +670,7 @@ type是ValueType.Boolean时，options决定true和false时在UI显示的文本�
 
 ### regex
 
-> regex只对String，Decimal，Integer校验，其他类型绕过正则表达式校验。
+> regex只对String，Decimal，Integer，File，Folder校验，其他类型Boolean，Color，DateTime绕过正则表达式校验。
 
 ```c#
 private string Convert2String(object value)
@@ -699,13 +699,13 @@ private string Convert2String(object value)
 }
 ```
 
-type是ValueType.String时，匹配规则是 `Regex.IsMatch(Convert2String(newValue), regex)`。
+- type是ValueType.String时，匹配规则是 `Regex.IsMatch(Convert2String(newValue), regex)`。
 
-example:
+example: IPV4
 
 `^((2((5[0-5])|([0-4]\d)))|([0-1]?\d{1,2}))(\.((2((5[0-5])|([0-4]\d)))|([0-1]?\d{1,2}))){3}$`
 
-type是ValueType.Integer或ValueType.Decimal时，匹配规则是 `Regex.IsMatch(decimal.Parse(Convert2String(newValue)).ToString(), regex)`，也就是说，数字的字符串形式有多种，比如十六进制，科学计数法等，但是在进行正则表达式匹配时，总是先转换成最简单的十进制的字符串再去匹配。
+- type是ValueType.Integer或ValueType.Decimal时，匹配规则是 `Regex.IsMatch(decimal.Parse(Convert2String(newValue)).ToString(), regex)`，也就是说，数字的字符串形式有多种，比如十六进制，科学计数法等，但是在进行正则表达式匹配时，总是先转换成最简单的十进制的字符串再去匹配。
 
 example: 
 
@@ -873,3 +873,5 @@ Console.WriteLine(source.GetValue<bool>("System.IsSimulatorMode"));
 ## Awesome Example
 
 ## TODO
+
+- File和Folder目前仅支持Windows路径，后续应当补充支持Linux和Mac。

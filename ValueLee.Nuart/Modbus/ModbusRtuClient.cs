@@ -10,9 +10,9 @@ using Nuart.RequestReplyModel;
 
 namespace Nuart.Modbus
 {
-    public class ModbusRtuClient : IModbusClient, ISerialInterface
+    public class ModbusRtuClient : IModbusClient, ISerialPort
     {
-        private SerialInterface<ModbusRtuFilter> serialInterface;
+        private SerialPort<ModbusRtuFilter> serialInterface;
 
         public ModbusRtuClient(string portName) : this(portName, 9600)
         {
@@ -24,7 +24,7 @@ namespace Nuart.Modbus
 
         public ModbusRtuClient(string portName, int baudRate, Parity parity, StopBits stopBits, int dataBits, bool rtsEnable, Handshake handshake)
         {
-            serialInterface = new SerialInterface<ModbusRtuFilter>(portName, baudRate, parity, stopBits, dataBits, rtsEnable, handshake);
+            serialInterface = new SerialPort<ModbusRtuFilter>(portName, baudRate, parity, stopBits, dataBits, rtsEnable, handshake);
         }
 
         public ModbusRtuClient(string portName, int baudRate, Parity parity, StopBits stopBits, int dataBits) : this(portName, baudRate, parity, stopBits, dataBits, false, Handshake.None)
@@ -35,7 +35,7 @@ namespace Nuart.Modbus
         {
         }
 
-        event Action<SerialEventArgs<byte[]>> ISerialInterface.CompletedFrameReceived
+        event Action<SerialEventArgs<byte[]>> ISerialPort.CompletedFrameReceived
         {
             add
             {
@@ -48,7 +48,7 @@ namespace Nuart.Modbus
             }
         }
 
-        event Action<SerialEventArgs<byte[]>> ISerialInterface.DataRead
+        event Action<SerialEventArgs<byte[]>> ISerialPort.DataRead
         {
             add
             {
@@ -61,7 +61,7 @@ namespace Nuart.Modbus
             }
         }
 
-        event Action<SerialEventArgs<byte[]>> ISerialInterface.DataSent
+        event Action<SerialEventArgs<byte[]>> ISerialPort.DataSent
         {
             add
             {
@@ -74,7 +74,7 @@ namespace Nuart.Modbus
             }
         }
 
-        event Action<SerialEventArgs<Exception>> ISerialInterface.TimedDataReadingJobThrowException
+        event Action<SerialEventArgs<Exception>> ISerialPort.TimedDataReadingJobThrowException
         {
             add
             {
@@ -93,12 +93,12 @@ namespace Nuart.Modbus
         public int LastCompletedFrameResolvedTime => serialInterface.LastCompletedFrameResolvedTime;
         public Parity Parity => serialInterface.Parity;
         public string PortName => serialInterface.PortName;
-        int ISerialInterface.RecvBuffLength => serialInterface.RecvBuffLength;
+        int ISerialPort.RecvBuffLength => serialInterface.RecvBuffLength;
         public bool RtsEnable => serialInterface.RtsEnable;
         public StopBits StopBits => serialInterface.StopBits;
         public object Tag { get => serialInterface.Tag; set => serialInterface.Tag = value; }
 
-        Response<byte[]> ISerialInterface.Request(byte[] bytes, int waitResponseTimeout)
+        Response<byte[]> ISerialPort.Request(byte[] bytes, int waitResponseTimeout)
         {
             return serialInterface.Request(bytes, waitResponseTimeout);
         }

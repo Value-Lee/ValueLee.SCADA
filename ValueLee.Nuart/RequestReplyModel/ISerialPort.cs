@@ -1,17 +1,16 @@
 ﻿using System;
 using System.IO.Ports;
+using ValueLee.Nuart;
 
 namespace Nuart.RequestReplyModel
 {
-    public interface ISerialInterface
+    public interface ISerialPort : IDisposable
     {
         event Action<SerialEventArgs<byte[]>> CompletedFrameReceived;
 
         event Action<SerialEventArgs<byte[]>> DataRead;
 
         event Action<SerialEventArgs<byte[]>> DataSent;
-
-        event Action<SerialEventArgs<Exception>> TimedDataReadingJobThrowException;
 
         int BaudRate { get; }
 

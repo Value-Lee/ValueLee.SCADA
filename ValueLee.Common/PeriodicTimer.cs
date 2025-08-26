@@ -17,7 +17,7 @@ namespace ValueLee.Common
 
         public PeriodicTimer(int periodMS)
         {
-            if(periodMS <= 0)
+            if (periodMS <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(periodMS), "Period must be greater than zero.");
             }
@@ -27,9 +27,7 @@ namespace ValueLee.Common
 
         public event Action<Exception> CallbackExceptionOccured;
 
-        public event Action TimerCallback;
-
-        internal PeriodicTimerCache TimerCache { get; set; }
+        public Action Callback { get; set; }
 
         public void Dispose()
         {
@@ -37,7 +35,6 @@ namespace ValueLee.Common
             {
                 if (!_disposed)
                 {
-                    this.TimerCache?.RemoveTimer(this);
                     if (_timer != null)
                     {
                         _timer.Dispose();
@@ -59,7 +56,35 @@ namespace ValueLee.Common
                 }
                 if (_timer == null)
                 {
-                    _timer = new Timer(Callback, null, Timeout.Infinite, Timeout.Infinite);
+                    _timer = new Timer((state) =>
+                    {
+                        if (Callback == null)
+                        {
+                            return; // No subscribers, nothing to do
+                        }
+                        foreach (var del in this.Callback?.GetInvocationList())
+                        {
+                            try
+                            {
+                                del.DynamicInvoke();
+                            }
+                            catch (Exception ex)
+                            {
+                                Task.Run(() =>
+                                {
+                                    CallbackExceptionOccured?.Invoke(ex);
+                                });
+                            }
+                        }
+                        try
+                        {
+                            _timer.Change(_periodMS, Timeout.Infinite);
+                        }
+                        catch (ObjectDisposedException)
+                        {
+                            ; // empty
+                        }
+                    }, null, Timeout.Infinite, Timeout.Infinite);
                     _timer.Change(0, Timeout.Infinite);
                 }
             }
@@ -102,36 +127,6 @@ namespace ValueLee.Common
                 }
                 _timer = null;
                 return true;
-            }
-        }
-
-        private void Callback(object state)
-        {
-            if (TimerCallback == null)
-            {
-                return; // No subscribers, nothing to do
-            }
-            foreach (var del in this.TimerCallback?.GetInvocationList())
-            {
-                try
-                {
-                    del.DynamicInvoke();
-                }
-                catch (Exception ex)
-                {
-                    Task.Run(() =>
-                    {
-                        CallbackExceptionOccured?.Invoke(ex);
-                    });
-                }
-            }
-            try
-            {
-                _timer.Change(_periodMS, Timeout.Infinite);
-            }
-            catch (ObjectDisposedException)
-            {
-                ; // empty
             }
         }
     }

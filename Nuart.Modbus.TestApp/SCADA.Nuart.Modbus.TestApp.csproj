@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net9.0-windows7.0</TargetFramework>
+		<Nullable>disable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UseWPF>true</UseWPF>
+		<GenerateMSBuildEditorConfigFile>false</GenerateMSBuildEditorConfigFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="NLog" Version="5.4.0" />
+		<PackageReference Include="NLog.Extensions.Logging" Version="5.4.0" />
+		<PackageReference Include="NLog.Schema" Version="5.4.0" />
+		<PackageReference Include="Prism.DryIoc" Version="9.0.537" />
+		<PackageReference Include="System.IO.Ports" Version="9.0.5" />
+		<PackageReference Include="XamlPearls" Version="1.0.0" />
+		<PackageReference Include="Xceed.Products.Wpf.Toolkit.Full" Version="4.6.24151.1544" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\ValueLee.Nuart\SCADA.Nuart.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="AppConfig.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+</Project>

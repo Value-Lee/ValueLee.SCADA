@@ -1,0 +1,40 @@
+﻿<Window
+    x:Class="ValueLee.Common.TestProject.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:local="clr-namespace:ValueLee.Common.TestProject"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:prism="http://prismlibrary.com/"
+    xmlns:xp="https://github.com/Value-Lee/XamlPearls"
+    Name="Self"
+    Title="MainWindow"
+    Width="800"
+    Height="450"
+    prism:ViewModelLocator.AutoWireViewModel="True"
+    mc:Ignorable="d">
+    <UniformGrid>
+        <GroupBox
+            Width="150"
+            Height="100"
+            Header="PeriodTimer_Test">
+            <StackPanel>
+                <Button Margin="5,15,5,5" Content="Start">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Click">
+                            <xp:CallMethodAction MethodName="StartPeriodTimer" TargetObject="{Binding ElementName=Self, Path=DataContext}" />
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </Button>
+                <Button Margin="5" Content="Stop">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Click">
+                            <xp:CallMethodAction MethodName="StopPeriodTimer" TargetObject="{Binding ElementName=Self, Path=DataContext}" />
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </Button>
+            </StackPanel>
+        </GroupBox>
+    </UniformGrid>
+</Window>

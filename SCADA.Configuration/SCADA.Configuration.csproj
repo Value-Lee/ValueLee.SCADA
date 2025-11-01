@@ -1,73 +1,60 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <TargetFrameworks>net452;net462;net6.0</TargetFrameworks>
-    <ImplicitUsings>disable</ImplicitUsings>
-    <Nullable>disable</Nullable>
-    <PackageReadmeFile>readme.md</PackageReadmeFile>
-    <Title>$(AssemblyName)</Title>
-    <PackageTags>Config;XML</PackageTags>
-    <IncludeSymbols>True</IncludeSymbols>
-    <PackageIcon>setting.png</PackageIcon>
-    <SignAssembly>True</SignAssembly>
-    <DelaySign>False</DelaySign>
-    <AssemblyOriginatorKeyFile>valuelee.snk</AssemblyOriginatorKeyFile>
-    <RepositoryUrl>https://github.com/Value-Lee/ValueLee.SCADA.git</RepositoryUrl>
-    <PackageProjectUrl>https://github.com/Value-Lee/ValueLee.SCADA.git</PackageProjectUrl>
-    <Copyright>Copyright © 2025 ValueLee</Copyright>
-    <Version>0.9.0</Version>
-    <RepositoryType>git</RepositoryType>
-    <Authors>Value Lee</Authors>
-    <PackageLicenseExpression>LicenseRef-Anti-996-1.0</PackageLicenseExpression>
-    <Description>A class library for high-performance read and write configuration based on XML.</Description>
-  </PropertyGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net462'">
-    <PackageReference Include="System.Threading.Channels">
-      <Version>9.0.7</Version>
-    </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
-    <PackageReference Include="System.Threading.Channels">
-      <Version>9.0.7</Version>
-    </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="readme.md" />
-    <None Remove="setting.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="readme.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </EmbeddedResource>
-    <EmbeddedResource Include="setting.png">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="ExceptionMessages.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>ExceptionMessages.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Update="ExceptionMessages.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>ExceptionMessages.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
-
+	<PropertyGroup>
+		<TargetFrameworks>net452;net462;net6.0</TargetFrameworks>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<Nullable>disable</Nullable>
+		<PackageReadmeFile>readme.md</PackageReadmeFile>
+		<Title>$(AssemblyName)</Title>
+		<PackageTags>Config;XML</PackageTags>
+		<IncludeSymbols>True</IncludeSymbols>
+		<PackageIcon>setting.png</PackageIcon>
+		<SignAssembly>True</SignAssembly>
+		<DelaySign>False</DelaySign>
+		<AssemblyOriginatorKeyFile>valuelee.snk</AssemblyOriginatorKeyFile>
+		<RepositoryUrl>https://github.com/Value-Lee/ValueLee.SCADA.git</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/Value-Lee/ValueLee.SCADA.git</PackageProjectUrl>
+		<Copyright>Copyright © 2025 ValueLee</Copyright>
+		<Version>0.9.0</Version>
+		<RepositoryType>git</RepositoryType>
+		<Authors>Value Lee</Authors>
+		<PackageLicenseExpression>LicenseRef-Anti-996-1.0</PackageLicenseExpression>
+		<Description>A class library for high-performance read and write configuration based on XML.</Description>
+	</PropertyGroup>
+	<ItemGroup>
+		<None Remove="readme.md"/>
+		<None Remove="setting.png"/>
+	</ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="readme.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</EmbeddedResource>
+		<EmbeddedResource Include="setting.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</EmbeddedResource>
+	</ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'net462'">
+		<PackageReference Include="System.Threading.Channels" Version="9.0.9"/>
+	</ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+		<PackageReference Include="System.Threading.Channels" Version="8.0.0"/>
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="System.ValueTuple" Version="4.5.0"/>
+	</ItemGroup>
+	<ItemGroup>
+		<Compile Update="ExceptionMessages.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>ExceptionMessages.resx</DependentUpon>
+		</Compile>
+	</ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Update="ExceptionMessages.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>ExceptionMessages.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
+	</ItemGroup>
 </Project>

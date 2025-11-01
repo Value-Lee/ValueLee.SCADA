@@ -29,6 +29,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SCADA.Nuart.Modbus.TestApp"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SCADA.DataAcquisition", "SCADA.DataAcquisition\SCADA.DataAcquisition.csproj", "{BB4063CF-F401-4442-BE9A-9AFDCEA45105}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SCADA.PLCFramework.Test", "SCADA.PLCFramework.Test\SCADA.PLCFramework.Test.csproj", "{A18AFD86-87B3-4A9A-8E32-053C2EFA5A88}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SCADA.DiskLogger", "SCADA.DiskLogger\SCADA.DiskLogger.csproj", "{A64B7DB0-95C2-47F4-8DC5-EAD108AB21D2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SCADA.PlcAdapters", "SCADA.PlcAdapters\SCADA.PlcAdapters.csproj", "{762F4C05-61DE-4478-BBA0-16374D90DD74}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +93,18 @@ Global
 		{BB4063CF-F401-4442-BE9A-9AFDCEA45105}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BB4063CF-F401-4442-BE9A-9AFDCEA45105}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BB4063CF-F401-4442-BE9A-9AFDCEA45105}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A18AFD86-87B3-4A9A-8E32-053C2EFA5A88}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A18AFD86-87B3-4A9A-8E32-053C2EFA5A88}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A18AFD86-87B3-4A9A-8E32-053C2EFA5A88}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A18AFD86-87B3-4A9A-8E32-053C2EFA5A88}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A64B7DB0-95C2-47F4-8DC5-EAD108AB21D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A64B7DB0-95C2-47F4-8DC5-EAD108AB21D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A64B7DB0-95C2-47F4-8DC5-EAD108AB21D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A64B7DB0-95C2-47F4-8DC5-EAD108AB21D2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{762F4C05-61DE-4478-BBA0-16374D90DD74}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{762F4C05-61DE-4478-BBA0-16374D90DD74}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{762F4C05-61DE-4478-BBA0-16374D90DD74}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{762F4C05-61DE-4478-BBA0-16374D90DD74}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,9 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netframework452;net6.0</TargetFrameworks>
+    <TargetFrameworks>netframework462;net6.0</TargetFrameworks>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Bcl.HashCode" Version="6.0.0" />
+    <PackageReference Include="morelinq" Version="3.3.2" />
+    <PackageReference Include="System.Text.Json" Version="9.0.9" />
+    <PackageReference Include="System.Threading.Channels" Version="9.0.9" />
+    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SCADA.Common\SCADA.Common.csproj" />
+    <ProjectReference Include="..\SCADA.ObjectModel\SCADA.ObjectModel.csproj" />
+  </ItemGroup>
 
 </Project>

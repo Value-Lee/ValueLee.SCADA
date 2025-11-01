@@ -5,7 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
 
-namespace ValueLee.Configuration.WpfControls
+namespace SCADA.Configuration.WpfControls
 {
     public class SetpointTextBoxBehavior : Behavior<TextBox>
     {

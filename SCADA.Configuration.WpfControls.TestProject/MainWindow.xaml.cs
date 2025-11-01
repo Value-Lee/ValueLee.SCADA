@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using System.Windows;
 
-namespace ValueLee.Configuration.WpfControls.TestProject
+namespace SCADA.Configuration.WpfControls.TestProject
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

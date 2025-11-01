@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net462;net6.0</TargetFrameworks>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SCADA.PLCFramework\SCADA.PLCFramework.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Beckhoff\" />
+    <Folder Include="Melsec\" />
+    <Folder Include="Siemens\" />
+  </ItemGroup>
+
+</Project>

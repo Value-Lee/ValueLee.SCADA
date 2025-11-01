@@ -8,7 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace ValueLee.Configuration
+namespace SCADA.Configuration
 {
     public class Utility
     {

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SCADA.ObjectModel
 {
-    public interface IDevice : IModular, IScript, IDataLogger, ITimerDemander
+    public interface IDevice
     {
         void Initialize();
         void Terminate();

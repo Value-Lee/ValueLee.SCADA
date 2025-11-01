@@ -4,12 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SCADA.PLCFramework
+namespace SCADA.PLCFramework.Test
 {
-    public enum RWMode
+    internal class Program
     {
-        Directly,
-        FromCache,
-        ByBlock
+        static void Main(string[] args)
+        {
+
+        }
     }
 }

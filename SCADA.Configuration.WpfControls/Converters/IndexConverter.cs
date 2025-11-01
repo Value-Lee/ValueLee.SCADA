@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Data;
 
-namespace ValueLee.Configuration.WpfControls.Converters
+namespace SCADA.Configuration.WpfControls.Converters
 {
     public class IndexConverter : IMultiValueConverter
     {

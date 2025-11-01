@@ -2,7 +2,7 @@
 using System.Windows.Data;
 using System.Windows.Markup;
 
-namespace ValueLee.Configuration.WpfControls.Localization
+namespace SCADA.Configuration.WpfControls.Localization
 {
     [MarkupExtensionReturnType(typeof(string))]
     public class TranslateExtension : MarkupExtension

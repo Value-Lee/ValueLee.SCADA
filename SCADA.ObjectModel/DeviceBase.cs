@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace SCADA.ObjectModel
 {
+    // 1. 数据采集功能 2. AlarmEvent注册抛出功能 3.脚本功能
     public class DeviceBase : IDevice
     {
         public DeviceBase(string module, string name)

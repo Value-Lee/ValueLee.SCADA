@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace ValueLee.Configuration.WpfControls
+namespace SCADA.Configuration.WpfControls
 {
     internal class SetpointRadioButtonBehavior : Behavior<RadioButton>
     {

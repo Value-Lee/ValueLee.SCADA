@@ -2,7 +2,7 @@
 using System.Net.Http;
 using System.Windows;
 
-namespace ValueLee.Common.TestProject;
+namespace SCADA.Common.TestProject;
 
 /// <summary>
 /// Interaction logic for App.xaml

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media; // Assuming Ookii.Dialogs.Wpf is used for file dialogs
 
-namespace ValueLee.Configuration.WpfControls
+namespace SCADA.Configuration.WpfControls
 {
     internal class SetpointFilePathButtonBehavior:Behavior<System.Windows.Controls.Button>
     {

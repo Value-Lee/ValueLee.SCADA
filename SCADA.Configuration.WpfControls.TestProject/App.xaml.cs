@@ -3,7 +3,7 @@ using System.Data;
 using System.Globalization;
 using System.Windows;
 
-namespace ValueLee.Configuration.WpfControls.TestProject
+namespace SCADA.Configuration.WpfControls.TestProject
 {
     /// <summary>
     /// Interaction logic for App.xaml

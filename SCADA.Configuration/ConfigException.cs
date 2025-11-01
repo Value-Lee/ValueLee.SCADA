@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ValueLee.Configuration
+namespace SCADA.Configuration
 {
     internal class ConfigException : ArgumentException
     {

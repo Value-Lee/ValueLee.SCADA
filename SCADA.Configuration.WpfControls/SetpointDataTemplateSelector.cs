@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace ValueLee.Configuration.WpfControls
+namespace SCADA.Configuration.WpfControls
 {
     public class SetpointDataTemplateSelector : DataTemplateSelector
     {

@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Windows.Data;
 
-namespace ValueLee.Configuration.WpfControls.Converters
+namespace SCADA.Configuration.WpfControls.Converters
 {
     internal class ValueMatchOptionsConverter : IMultiValueConverter
     {

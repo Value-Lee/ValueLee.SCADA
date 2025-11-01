@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Linq;
 
-namespace ValueLee.Configuration.WpfControls
+namespace SCADA.Configuration.WpfControls
 {
     public class ObservableConfigNode : INotifyPropertyChanged
     {

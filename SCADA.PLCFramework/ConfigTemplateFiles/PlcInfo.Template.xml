@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!--
+说明：
+  1. name 必须以DI_ DO_ AI_ AO_开 头命名，分别表示数字量输入、数字量输出、模拟量输入、模拟量输出
+  2. addr 1,2,3,4,...,1.0,1.1,1.2,...1.7
+  3. type bool int float double string1,string2,...stringN
+  4. 要支持直接写PLC，如配方，它不需要实时读取，只有在打开某个界面时才读取PLC数据，可以配置为不读PLC，在点击发送配方时，写一次。
+  5. 所以在此文件中只是配置的是需要实时刷新的PLC地址
+-->
+<PlcInfo id="1" ip="192.168.2.10" port="12345" class="SCADA.PlcAdatpters.BeckoffPlcAdapter" assembly="SCADA.PlcAdatpters.dll">
+	<Block id="1" type="di" startaddr="" len="" polling="true"/>
+	<Block id="2" type="do" startaddr="" len="" polling="true"/>
+	<Block id="3" type="ai" startaddr="" len="" polling="true"/>
+	<Block id="4" type="ao" startaddr="" len="" polling="true"/>
+	<!--Read或Write时必须传入Block包含的所有Item，适用大字节的Recipe-->
+	<Block id="5" type="ai" startaddr="" len="" polling="false"/>
+	<!--Read或Write时时必须传入Block包含的所有Item，适用大字节的Recipe-->
+	<Block id="6" type="ao" startaddr="" len="" polling="false"/>
+	<DIs>
+		<Item name="DI_DoorClosed" addr="" type="" blockid="1" display="" desc="Door Closed"/>
+	</DIs>
+	<DOs>
+		<Item name="DO_CloseDoor" addr="" type="" blockid="2" display="" desc="Close Door"/>
+	</DOs>
+	<AIs>
+		<Item name="AI_ChamberPressure" addr="" type="1" blockid="3" display="" desc="Chamber Pressure"/>
+	</AIs>
+	<AOs>
+		<Item name="AO_GasLineTemperature" addr="" type="1" blockid="4" display="" desc="Gas Line Temperature"/>
+	</AOs>
+</PlcInfo>

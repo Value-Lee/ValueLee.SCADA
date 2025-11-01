@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Data;
 
-namespace ValueLee.Configuration.WpfControls.Converters
+namespace SCADA.Configuration.WpfControls.Converters
 {
     public class String2ReversedBoolConverter : IValueConverter
     {

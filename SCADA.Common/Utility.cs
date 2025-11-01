@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace SCADA.Common
 {
     public static class Utility
     {
+        public static double GetMsDifference(long endTicks, long startTicks) => (endTicks - startTicks) * 1000.0 / Stopwatch.Frequency;
+
         public static bool GetBitValue(byte data, int index)
         {
             if (index < 0 || index > 7)

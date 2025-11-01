@@ -1,6 +1,8 @@
-﻿using System.Text;
+﻿using System;
+using System.IO;
+using System.Text;
 
-namespace ValueLee.Configuration.TestProject
+namespace SCADA.Configuration.TestProject
 {
     public class PrimitiveConfigSource_UnitTest
     {
@@ -62,44 +64,45 @@ namespace ValueLee.Configuration.TestProject
         [Fact]
         public void GetValue_Number_Test()
         {
-            string xml = """
-                <?xml version="1.0" encoding="utf-8"?>
+            string xml = @"<?xml version=""1.0"" encoding=""utf-8""?>
                 <root>
-                	<config name="System">
-                		<config name="Count1" value="10" type="Integer" />
-                		<config name="Count2" value="0x0A" type="Integer" />
-                        <config name="Count3" value="-1,000" type="Integer" />
-                        <config name="Count4" value="10,00,00" type="Integer" />
-                        <config name="Count5" value="1.00" type="Integer" />
-                        <config name="Count6" value="12,345.00" type="Integer" />
+                	<config name=""System"">
+                		<config name=""Count1"" value=""10"" type=""Integer"" />
+                		<config name=""Count2"" value=""0x0A"" type=""Integer"" />
+                        <config name=""Count3"" value=""-1,000"" type=""Integer"" />
+                        <config name=""Count4"" value=""10,00,00"" type=""Integer"" />
+                        <config name=""Count5"" value=""1.00"" type=""Integer"" />
+                        <config name=""Count6"" value=""12,345.00"" type=""Integer"" />
 
-                        <config name="Number1" value="6.5" type="Decimal" />
-                        <config name="Number2" value="6" type="Decimal" />
-                        <config name="Number3" value="-6.5" type="Decimal" />
-                        <config name="Number4" value="1,234.5" type="Decimal" />
-                        <config name="Number5" value="0x0A" type="Decimal" />
-                        <config name="Number6" value="1,234.5e-3" type="Decimal" />
+                        <config name=""Number1"" value=""6.5"" type=""Decimal"" />
+                        <config name=""Number2"" value=""6"" type=""Decimal"" />
+                        <config name=""Number3"" value=""-6.5"" type=""Decimal"" />
+                        <config name=""Number4"" value=""1,234.5"" type=""Decimal"" />
+                        <config name=""Number5"" value=""0x0A"" type=""Decimal"" />
+                        <config name=""Number6"" value=""1,234.5e-3"" type=""Decimal"" />
                 	</config>
-                </root>
-                """;
+                </root>";
 
-            using PrimitiveConfigSource source = new PrimitiveConfigSource(xml);
-            // Test Integer
-            Assert.Equal(10, source.GetValue<int>("System.Count1"));
-            Assert.Equal(10, source.GetValue<double>("System.Count1")); // Integer supports mapping to C# decimal
-            Assert.Equal(10, source.GetValue<int>("System.Count2"));
-            Assert.Equal(-1000, source.GetValue<int>("System.Count3"));
-            Assert.Equal(100000, source.GetValue<int>("System.Count4"));
-            Assert.Equal(1, source.GetValue<int>("System.Count5")); // It is allowed to be a decimal with all decimal places being zeros
-            Assert.Equal(12345, source.GetValue<int>("System.Count6"));
-            // Test Decimal
-            Assert.Equal(6.5, source.GetValue<double>("System.Number1"));
-            Assert.Equal(6, source.GetValue<double>("System.Number2"));
-            Assert.Equal(-6.5, source.GetValue<double>("System.Number3"));
-            Assert.Equal(1234.5, source.GetValue<double>("System.Number4"));
-            Assert.Equal(10, source.GetValue<double>("System.Number5"));
-            Assert.Equal(1.2345, source.GetValue<double>("System.Number6")); // Support for scientific notation.
-            Assert.ThrowsAny<Exception>(() => source.GetValue<long>("System.Number2")); // Decimal does not support mapping to C# integers
+
+            using (PrimitiveConfigSource source = new PrimitiveConfigSource(xml))
+            {
+                // Test Integer
+                Assert.Equal(10, source.GetValue<int>("System.Count1"));
+                Assert.Equal(10, source.GetValue<double>("System.Count1")); // Integer supports mapping to C# decimal
+                Assert.Equal(10, source.GetValue<int>("System.Count2"));
+                Assert.Equal(-1000, source.GetValue<int>("System.Count3"));
+                Assert.Equal(100000, source.GetValue<int>("System.Count4"));
+                Assert.Equal(1, source.GetValue<int>("System.Count5")); // It is allowed to be a decimal with all decimal places being zeros
+                Assert.Equal(12345, source.GetValue<int>("System.Count6"));
+                // Test Decimal
+                Assert.Equal(6.5, source.GetValue<double>("System.Number1"));
+                Assert.Equal(6, source.GetValue<double>("System.Number2"));
+                Assert.Equal(-6.5, source.GetValue<double>("System.Number3"));
+                Assert.Equal(1234.5, source.GetValue<double>("System.Number4"));
+                Assert.Equal(10, source.GetValue<double>("System.Number5"));
+                Assert.Equal(1.2345, source.GetValue<double>("System.Number6")); // Support for scientific notation.
+                Assert.ThrowsAny<Exception>(() => source.GetValue<long>("System.Number2")); // Decimal does not support mapping to C# integers
+            }
         }
 
         [Fact]
@@ -178,7 +181,7 @@ namespace ValueLee.Configuration.TestProject
             source.GetValue<System.Drawing.Color>("System.Color2");
         }
 
-        #endregion GetValue
+#endregion GetValue
 
         [Fact]
         public void Find_Test()

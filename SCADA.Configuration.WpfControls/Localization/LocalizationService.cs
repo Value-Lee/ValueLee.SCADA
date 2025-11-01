@@ -5,7 +5,7 @@ using System.Resources;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
-namespace ValueLee.Configuration.WpfControls.Localization
+namespace SCADA.Configuration.WpfControls.Localization
 {
     public class LocalizationService : INotifyPropertyChanged
     {

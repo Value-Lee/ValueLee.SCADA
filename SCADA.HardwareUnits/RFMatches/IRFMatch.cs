@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ValueLee.HardwareUnits.RFMatches
+namespace SCADA.HardwareUnits.RFMatches
 {
     public interface IRFMatch
     {

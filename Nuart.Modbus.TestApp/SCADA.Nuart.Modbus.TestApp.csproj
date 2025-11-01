@@ -20,7 +20,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\ValueLee.Nuart\SCADA.Nuart.csproj" />
+	  <ProjectReference Include="..\SCADA.UART\SCADA.UART.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

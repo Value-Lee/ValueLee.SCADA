@@ -8,7 +8,9 @@ namespace SCADA.Common
 {
     public class OperationResult
     {
-        public bool IsSuccess { get; set; }
+        public bool IsSuccess => string.IsNullOrWhiteSpace(ErrMsg) && Exception == null;
+        public string ErrMsg { get; set; }
+        public Exception Exception { get; set; }
     }
 
     public class OperationResult<T> : OperationResult

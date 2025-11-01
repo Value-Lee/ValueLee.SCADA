@@ -1,10 +1,10 @@
-﻿namespace ValueLee.Configuration
+﻿namespace SCADA.Configuration
 {
     using System.Reflection;
     using System.Resources;
     using System.Threading;
 
-    public static class ExceptionHelper
+    internal static class ExceptionHelper
     {
         private static readonly ResourceManager rm =
             new ResourceManager("ValueLee.Configuration.ExceptionMessages", Assembly.GetExecutingAssembly());

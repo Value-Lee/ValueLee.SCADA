@@ -16,7 +16,7 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Xml;
 
-namespace ValueLee.Configuration
+namespace SCADA.Configuration
 {
     public class PrimitiveConfigSource : IDisposable
     {

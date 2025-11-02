@@ -17,7 +17,6 @@
 		<Version>0.9.0</Version>
 		<RepositoryType>git</RepositoryType>
 		<Authors>Value Lee</Authors>
-		<PackageLicenseExpression>LicenseRef-Anti-996-1.0</PackageLicenseExpression>
 		<Description>A class library for high-performance read and write configuration based on XML.</Description>
 	</PropertyGroup>
 	<ItemGroup>

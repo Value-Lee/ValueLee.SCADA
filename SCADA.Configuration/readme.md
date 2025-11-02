@@ -816,3 +816,4 @@ Console.WriteLine(source.GetValue<bool>("System.IsSimulatorMode"));
 ## TODO
 
 - File和Folder目前仅支持Windows路径，后续应当补充支持Linux和Mac。
+- 加载XML字符串时，检查它不能含有不允许出现的属性和节点。

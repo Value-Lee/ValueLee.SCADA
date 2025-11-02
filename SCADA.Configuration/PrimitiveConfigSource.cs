@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-#if NET462_OR_GREATER || NET6_0_OR_GREATER
+#if NET462_OR_GREATER || NET8_0_OR_GREATER
 using System.Threading.Channels;
 #endif
 
@@ -22,7 +22,7 @@ namespace SCADA.Configuration
     {
 #if NET452
         private readonly BlockingCollection<IEnumerable<(string configItem, string value)>> _blockingCollection = new BlockingCollection<IEnumerable<(string configItem, string value)>>();
-#elif NET462_OR_GREATER || NET6_0_OR_GREATER
+#elif NET462_OR_GREATER || NET8_0_OR_GREATER
         private readonly Channel<IEnumerable<(string configItem, string value)>> _channel = Channel.CreateUnbounded<IEnumerable<(string configItem, string value)>>();
 #endif
 
@@ -120,7 +120,7 @@ namespace SCADA.Configuration
                 {
                 }
             });
-#elif NET462_OR_GREATER || NET6_0_OR_GREATER
+#elif NET462_OR_GREATER || NET8_0_OR_GREATER
             async Task Function()
             {
                 try
@@ -179,7 +179,7 @@ namespace SCADA.Configuration
                 // GC.SuppressFinalize(this); // 不是必须的，因为没析构函数
                 _disposed = true;
             }
-#elif NET462_OR_GREATER || NET6_0_OR_GREATER
+#elif NET462_OR_GREATER || NET8_0_OR_GREATER
             if (!_disposed)
             {
                 _channel.Writer.Complete();
@@ -886,7 +886,7 @@ namespace SCADA.Configuration
 
 #if NET452
                 _blockingCollection.Add(needModifyinglist);
-#elif NET462_OR_GREATER || NET6_0_OR_GREATER
+#elif NET462_OR_GREATER || NET8_0_OR_GREATER
                 _channel.Writer.WriteAsync(needModifyinglist).AsTask().GetAwaiter().GetResult();
 #endif
                 ValueSet?.Invoke(list.ToArray());

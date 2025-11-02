@@ -611,24 +611,24 @@ root下可以有多个分类节点。下面有两个配置项`System.CycleCount`
 
 ### Data node
 
-`<config name="RemoteIpAddress" value="127.0.0.1" type="String" max="" min="" regex="^((2((5[0-5])|([0-4]\d)))|([0-1]?\d{1,2}))(\.((2((5[0-5])|([0-4]\d)))|([0-1]?\d{1,2}))){3}$" regexnote="必须是正确的IP地址格式" options="127.0.0.1;192.168.2.22;172.176.1.1" description="服务器的IP地址" unit=""  visible="true" enable="true" restart="true" />`
+`<config name="RemoteIpAddress" value="127.0.0.1" type="String" max="" min="" regex="^((2((5[0-5])|([0-4]\d)))|([0-1]?\d{1,2}))(\.((2((5[0-5])|([0-4]\d)))|([0-1]?\d{1,2}))){3}$" regexnote="必须是正确的IP地址格式" options="127.0.0.1;192.168.2.22;172.176.1.1" desc="服务器的IP地址" unit=""  visible="true" enable="true" restart="true" />`
 
-| Attribute                            | Description                                                  | Default Value                       |
-| ------------------------------------ | ------------------------------------------------------------ | ----------------------------------- |
-| <font color=red>name</font>          | 必须配置，数据节点的ID                                       |                                     |
-| <font color=red>value</font>         | 必须配置，数据项的值                                         |                                     |
-| <font color=red>type</font>          | 必须配置，数据项的值类型。                                   |                                     |
-| <font color=orange>max</font>        | 可选配置，数据项的允许值的最大边界。此属性只有`type`是`Integer` `Decimal`才有效。 | decimal.MaxValue                    |
-| <font color=orange>min</font>        | 可选配置，数据项的允许值的最小边界。此属性只有`type`是`Integer` `Decimal`才有效。 | decimal.MinValue                    |
-| <font color=orange>regex</font>      | 可选配置，正则表达式。SetValue的新值实参最终转换成的字符串，必须匹配此正则表达式，否则拒绝本次修改。 | string.Empty                        |
-| <font color=orange>regexnote</font>  | 可选配置，regex的注解。正则表达式难以理解，可以用此项做注解，不是必须的。在程序中设置值时，如果正则表达式校验失败，抛出的异常信息是regexNote,如果未配置regexNote，异常信息是regex. | string.Empty                        |
-| <font color=orange>options</font>    | 允许的取值集合。用; 隔开，如 options="COM1;COM2;COM3" .      | empty array                         |
-| <font color=green>display</font>     | 可选配置，在UI显示的文字。For UI                             | same as <font color=red>name</font> |
-| <font color=green>description</font> | 可选配置，数据项的描述。For UI                               | string.Empty                        |
-| <font color=green>unit</font>        | 可选配置，数据项的单位，如 kg，Torr，mm，℃ ...... For UI     | string.Empty                        |
-| <font color=green>visible</font>     | 可选配置，数据项是否在UI可见。For UI                         | true                                |
-| <font color=green>enable</font>      | 可选配置，数据项是否可在UI更改。For UI                       | true                                |
-| <font color=green>restart</font>     | 可选配置，修改数据项的值后是否需要重启App。For UI            | false                               |
+| Attribute                           | Description                                                  | Default Value                       |
+| ----------------------------------- | ------------------------------------------------------------ | ----------------------------------- |
+| <font color=red>name</font>         | 必须配置，数据节点的ID                                       |                                     |
+| <font color=red>value</font>        | 必须配置，数据项的值                                         |                                     |
+| <font color=red>type</font>         | 必须配置，数据项的值类型。                                   |                                     |
+| <font color=orange>max</font>       | 可选配置，数据项的允许值的最大边界。此属性只有`type`是`Integer` `Decimal`才有效。 | decimal.MaxValue                    |
+| <font color=orange>min</font>       | 可选配置，数据项的允许值的最小边界。此属性只有`type`是`Integer` `Decimal`才有效。 | decimal.MinValue                    |
+| <font color=orange>regex</font>     | 可选配置，正则表达式。SetValue的新值实参最终转换成的字符串，必须匹配此正则表达式，否则拒绝本次修改。 | string.Empty                        |
+| <font color=orange>regexnote</font> | 可选配置，regex的注解。正则表达式难以理解，可以用此项做注解，不是必须的。在程序中设置值时，如果正则表达式校验失败，抛出的异常信息是regexNote,如果未配置regexNote，异常信息是regex. | string.Empty                        |
+| <font color=orange>options</font>   | 允许的取值集合。用; 隔开，如 options="COM1;COM2;COM3" .      | empty array                         |
+| <font color=green>display</font>    | 可选配置，在UI显示的文字。For UI                             | same as <font color=red>name</font> |
+| <font color=green>desc</font>       | 可选配置，数据项的描述。For UI                               | string.Empty                        |
+| <font color=green>unit</font>       | 可选配置，数据项的单位，如 kg，Torr，mm，℃ ...... For UI     | string.Empty                        |
+| <font color=green>visible</font>    | 可选配置，数据项是否在UI可见。For UI                         | true                                |
+| <font color=green>enable</font>     | 可选配置，数据项是否可在UI更改。For UI                       | true                                |
+| <font color=green>restart</font>    | 可选配置，修改数据项的值后是否需要重启App。For UI            | false                               |
 
 ### options
 

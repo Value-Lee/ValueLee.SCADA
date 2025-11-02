@@ -437,13 +437,13 @@ namespace SCADA.Configuration
                     }
 
                     string description = string.Empty;
-                    if (xNode.Attributes["description"] == null)
+                    if (xNode.Attributes["desc"] == null)
                     {
                         description = string.Empty;
                     }
                     else
                     {
-                        description = xNode.Attributes["description"].Value.Trim();
+                        description = xNode.Attributes["desc"].Value.Trim();
                     }
 
                     ValueType valueType = ValueType.String; // Default value type

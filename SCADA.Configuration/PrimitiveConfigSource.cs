@@ -887,7 +887,7 @@ namespace SCADA.Configuration
 #if NET452
                 _blockingCollection.Add(needModifyinglist);
 #elif NET462_OR_GREATER || NET6_0_OR_GREATER
-                _channel.Writer.WriteAsync(needModifyinglist).GetAwaiter().GetResult();
+                _channel.Writer.WriteAsync(needModifyinglist).AsTask().GetAwaiter().GetResult();
 #endif
                 ValueSet?.Invoke(list.ToArray());
             }

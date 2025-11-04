@@ -67,7 +67,7 @@ namespace SCADA.PLCFramework
             XmlDocument xmlDoc = new XmlDocument();
             xmlDoc.LoadXml(content);
             // 根节点必须是PlcInfo
-            var plcinfoNode = xmlDoc.SelectSingleNode("/PlcInfo") ?? throw new FormatException("Invalid PLC info content: Missing root 'PLCInfo' element.");
+            var plcinfoNode = xmlDoc.SelectSingleNode("/PlcInfo") ?? throw new FormatException("Invalid PLC info content: Missing root 'PlcInfo' element.");
             // 节点只能是 Block DIs DOs AIs AOs Item
             plcinfoNode.ChildNodes.Cast<XmlNode>().ToList().ForEach(node =>
             {
@@ -98,7 +98,7 @@ namespace SCADA.PLCFramework
                     if (node.Name != "Item")
                         throw new FormatException($"Invalid PLC info content: Unexpected element '{node.Name}' in 'AOs' element.Hints:{node.OuterXml}");
                 });
-            // 节点Block可以出现多次，且至少出现一次
+            // 节点Block可以出现多次，但至少出现一次
             if (plcinfoNode.SelectNodes("Block").Count < 1)
                 throw new FormatException("Invalid PLC info content: 'Block' element must appear at least once in 'PlcInfo' element.");
 

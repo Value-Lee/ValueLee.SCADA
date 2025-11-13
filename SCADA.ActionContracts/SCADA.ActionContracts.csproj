@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net452;net472;net8.0</TargetFrameworks>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'net452'">
+		<PackageReference Include="NetMQ">
+			<Version>4.0.1.13</Version>
+		</PackageReference>
+	</ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'net472'">
+		<PackageReference Include="NetMQ">
+			<Version>4.0.2.2</Version>
+		</PackageReference>
+	</ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+		<PackageReference Include="NetMQ">
+			<Version>4.0.2.2</Version>
+		</PackageReference>
+	</ItemGroup>
+</Project>

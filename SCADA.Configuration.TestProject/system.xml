@@ -1,20 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
 	<config name="System" display="">
-		<config value="false" name="IsSimulatorMode" desc="" max="" min="" options="" unit="" type="Boolean" restart="true" browseable="true" />
-		<config value="false" name="IsATMMode" desc="" max="" min="" options="" unit="" type="Boolean" />
-		<config value="3" name="CycleCount" desc="" max="" min="" options="" unit="" type="Integer" />
-		<config value="false" name="BypassInterlock" desc="Bypass Interlock" max="0" min="0" options="" unit="" type="Boolean" />
-		<config value="1000" name="DataCollectionInterval" desc="" max="99999" min="20" options="" unit="" type="Integer" />
-		<config value="60" name="LogsSaveDays" desc="" max="60000" min="0" options="" unit="" type="Integer" />
-		<config value="5" name="DiskFreeSpaceAlarmTolerance" desc="" max="4096" min="1" options="" unit="G" type="Decimal" />
-		<config value="CD" name="MonitoredDriveLetter" desc="" max="" min="" options="" unit="" type="String" />
-		<config name="LogsFolder" value="C:\Logs"  type="Folder" />
-		<config name="DataReport" value="C:\data.csv"  type="File" />
-		<config name="AlarmLight" value="#FFFFFF"  type="Color" />
-		<config name="ResetDate" value="2025-05-06 08:00:00"  type="DateTime" />
+		<config name="IsSimulatorMode" value="false" desc="" max="" min="" options="" unit="" type="Boolean" restart="true" browseable="true"/>
+		<config name="IsATMMode" value="false" desc="" max="" min="" options="" unit="" type="Boolean"/>
+		<config name="CycleCount" value="3" desc="" max="" min="" options="" unit="" type="Integer"/>
+		<config name="BypassInterlock" value="false" desc="Bypass Interlock" max="0" min="0" options="" unit="" type="Boolean"/>
+		<config name="DataCollectionInterval" value="1000" desc="" max="99999" min="20" options="" unit="" type="Integer"/>
+		<config name="LogsSaveDays" value="60" desc="" max="60000" min="0" options="" unit="" type="Integer"/>
+		<config name="DiskFreeSpaceAlarmTolerance" value="5" desc="" max="4096" min="1" options="" unit="G" type="Decimal"/>
+		<config name="MonitoredDriveLetter" value="CD" desc="" max="" min="" options="" unit="" type="String"/>
+		<config name="LogsFolder" value="C:\Logs" type="Folder"/>
+		<config name="DataReport" value="C:\data.csv" type="File"/>
+		<config name="AlarmLight" value="#FFFFFF" type="Color"/>
+		<config name="ResetDate" value="2025-05-06 08:00:00" type="DateTime"/>
 		<config name="Scheduler">
-			<config value="15" name="WaitLoadTimeOut" desc="" max="" min="" options="" unit="s" type="Decimal" />
+			<config value="15" name="WaitLoadTimeOut" desc="" max="" min="" options="" unit="s" type="Decimal"/>
 		</config>
 	</config>
 </root>

@@ -12,50 +12,50 @@ namespace SCADA.Configuration.TestProject
         [Fact]
         public void IsValidFile_Test()
         {
-            Assert.True(Utility.TryParse2File("C:\\Test\\test.txt", out var _));
-            Assert.True(Utility.TryParse2File("D:\\Test\\test.txt", out var _));
-            Assert.True(Utility.TryParse2File("Z:\\Test\\test.txt\\..", out var _));
-            Assert.True(Utility.TryParse2File("C:\\Test\\..\\test.txt", out var _));
-            Assert.True(Utility.TryParse2File("C:\\Test\\test.txt\\#", out var _));
-            Assert.False(Utility.TryParse2File("D:\\Test\\\\test.txt", out var _));
-            Assert.False(Utility.TryParse2File("C:\\Test\\test.txt\\?", out var _));
-            Assert.False(Utility.TryParse2File("C:\\Test\\test*?.txt", out var _));
-            Assert.False(Utility.TryParse2File("C:\\Test\\test.txt\\", out var _));
-            Assert.False(Utility.TryParse2File("C:\\Test\\\\test.txt", out var _));
-            Assert.False(Utility.TryParse2File("C:\\Test\\test.txt/", out var _));
-            Assert.False(Utility.TryParse2File("C:\\Test\\test.txt?", out var _));
-            Assert.False(Utility.TryParse2File("C:\\Test\\test.txt*", out var _));
-            Assert.False(Utility.TryParse2File("C:\\", out var _));
+            Assert.True(Parser.TryParse2File("C:\\Test\\test.txt", out var _));
+            Assert.True(Parser.TryParse2File("D:\\Test\\test.txt", out var _));
+            Assert.True(Parser.TryParse2File("Z:\\Test\\test.txt\\..", out var _));
+            Assert.True(Parser.TryParse2File("C:\\Test\\..\\test.txt", out var _));
+            Assert.True(Parser.TryParse2File("C:\\Test\\test.txt\\#", out var _));
+            Assert.False(Parser.TryParse2File("D:\\Test\\\\test.txt", out var _));
+            Assert.False(Parser.TryParse2File("C:\\Test\\test.txt\\?", out var _));
+            Assert.False(Parser.TryParse2File("C:\\Test\\test*?.txt", out var _));
+            Assert.False(Parser.TryParse2File("C:\\Test\\test.txt\\", out var _));
+            Assert.False(Parser.TryParse2File("C:\\Test\\\\test.txt", out var _));
+            Assert.False(Parser.TryParse2File("C:\\Test\\test.txt/", out var _));
+            Assert.False(Parser.TryParse2File("C:\\Test\\test.txt?", out var _));
+            Assert.False(Parser.TryParse2File("C:\\Test\\test.txt*", out var _));
+            Assert.False(Parser.TryParse2File("C:\\", out var _));
         }
 
         [Fact]
         public void IsValidFolder_Test()
         {
-            Assert.True(Utility.TryParse2Directory("C:\\Test\\", out var _));
-            Assert.True(Utility.TryParse2Directory("D:\\Test\\", out var _));
-            Assert.True(Utility.TryParse2Directory("Z:\\Test\\..\\", out var _));
-            Assert.True(Utility.TryParse2Directory("C:\\Test\\..\\", out var _));
-            Assert.True(Utility.TryParse2Directory("C:\\Test\\#", out var _));
-            Assert.True(Utility.TryParse2Directory("C:\\", out var _));
-            Assert.False(Utility.TryParse2Directory("D:\\\\Test\\", out var _));
-            Assert.False(Utility.TryParse2Directory("C:\\Test\\?", out var _));
-            Assert.False(Utility.TryParse2Directory("C:\\Test\\*", out var _));
-            Assert.False(Utility.TryParse2Directory("C:\\Test\\test.txt/", out var _));
-            Assert.False(Utility.TryParse2Directory("C:\\Test\\\\", out var _));
-            Assert.False(Utility.TryParse2Directory("C:\\Test\\test.txt?", out var _));
-            Assert.False(Utility.TryParse2Directory("C:\\Test\\test.txt*", out var _));
+            Assert.True(Parser.TryParse2Directory("C:\\Test\\", out var _));
+            Assert.True(Parser.TryParse2Directory("D:\\Test\\", out var _));
+            Assert.True(Parser.TryParse2Directory("Z:\\Test\\..\\", out var _));
+            Assert.True(Parser.TryParse2Directory("C:\\Test\\..\\", out var _));
+            Assert.True(Parser.TryParse2Directory("C:\\Test\\#", out var _));
+            Assert.True(Parser.TryParse2Directory("C:\\", out var _));
+            Assert.False(Parser.TryParse2Directory("D:\\\\Test\\", out var _));
+            Assert.False(Parser.TryParse2Directory("C:\\Test\\?", out var _));
+            Assert.False(Parser.TryParse2Directory("C:\\Test\\*", out var _));
+            Assert.False(Parser.TryParse2Directory("C:\\Test\\test.txt/", out var _));
+            Assert.False(Parser.TryParse2Directory("C:\\Test\\\\", out var _));
+            Assert.False(Parser.TryParse2Directory("C:\\Test\\test.txt?", out var _));
+            Assert.False(Parser.TryParse2Directory("C:\\Test\\test.txt*", out var _));
         }
 
         [Fact]
         public void IsValidColor_Test()
         {
-            Assert.True(Utility.TryParse2Color("#FFFFFF", out var _));
-            Assert.True(Utility.TryParse2Color("#A0FFFFFF", out var _));
-            Assert.False(Utility.TryParse2Color("#FFFFF", out var _)); // Invalid length
-            Assert.False(Utility.TryParse2Color("A0FFFFFF", out var _)); // Missing '#'
-            Assert.False(Utility.TryParse2Color("#GHIJKL", out var _)); // Invalid hex characters
-            Assert.False(Utility.TryParse2Color("#12345G", out var _)); // Invalid hex characters
-            Assert.False(Utility.TryParse2Color("123456", out var _)); // Missing '#'
+            Assert.True(Parser.TryParse2Color("#FFFFFF", out var _));
+            Assert.True(Parser.TryParse2Color("#A0FFFFFF", out var _));
+            Assert.False(Parser.TryParse2Color("#FFFFF", out var _)); // Invalid length
+            Assert.False(Parser.TryParse2Color("A0FFFFFF", out var _)); // Missing '#'
+            Assert.False(Parser.TryParse2Color("#GHIJKL", out var _)); // Invalid hex characters
+            Assert.False(Parser.TryParse2Color("#12345G", out var _)); // Invalid hex characters
+            Assert.False(Parser.TryParse2Color("123456", out var _)); // Missing '#'
         }
 
         #endregion Validate

@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<root>
+	<config name="SCADA">
+		<config value="1" name="DataLoggerInterval" type="double" unit="S" restart="false" min="0.1" max="60"></config>
+	</config>
+</root>

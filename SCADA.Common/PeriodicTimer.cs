@@ -10,7 +10,7 @@ namespace SCADA.Common
         private readonly object _locker;
         private CancellationTokenSource _cts;
         private bool _disposed;
-        private int _periodMS;
+        private volatile int _periodMS;
         private Timer _timer;
 
         public PeriodicTimer() : this(100)
@@ -42,14 +42,7 @@ namespace SCADA.Common
             {
                 throw new ArgumentOutOfRangeException(nameof(newPeriodMS), "Period must be non-negative.");
             }
-            lock (_locker)
-            {
-                if (_disposed)
-                {
-                    throw new ObjectDisposedException(nameof(PeriodicTimer), "Cannot change period of a disposed PeriodicTimer instance.");
-                }
-                _periodMS = newPeriodMS;
-            }
+            _periodMS = newPeriodMS;
         }
 
         public void Dispose()

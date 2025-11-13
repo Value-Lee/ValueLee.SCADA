@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
+
 
 #if NET462_OR_GREATER || NET8_0_OR_GREATER
 using System.Threading.Channels;
@@ -26,7 +26,7 @@ namespace SCADA.Configuration
         private readonly Channel<IEnumerable<(string configItem, string value)>> _channel = Channel.CreateUnbounded<IEnumerable<(string configItem, string value)>>();
 #endif
 
-        private readonly Dictionary<string, ConfigItem> _configItems = new Dictionary<string, ConfigItem>();
+        private readonly ConcurrentDictionary<string, ConfigItem> _configItems = new ConcurrentDictionary<string, ConfigItem>();
 
         private readonly Encoding _encoding;
 
@@ -36,7 +36,7 @@ namespace SCADA.Configuration
 
         private bool _disposed = false;
 
-        private Task _saveTask;
+        private readonly Task _saveTask;
 
         public PrimitiveConfigSource(string xmlString) : this(xmlString, (string)null)
         {
@@ -476,7 +476,7 @@ namespace SCADA.Configuration
                         {
                             maxValue = decimal.MaxValue;
                         }
-                        else if (!Utility.TryParse2Decimal(maxValueText, out maxValue))
+                        else if (!Parser.TryParse2Decimal(maxValueText, out maxValue))
                         {
                             throw new ConfigException($"Invalid value for 'max' attribute: '{maxValueText}'. Hint:'{xNode.OuterXml}'");
                         }
@@ -494,7 +494,7 @@ namespace SCADA.Configuration
                         {
                             minValue = decimal.MinValue;
                         }
-                        else if (!Utility.TryParse2Decimal(minValueText, out minValue))
+                        else if (!Parser.TryParse2Decimal(minValueText, out minValue))
                         {
                             throw new ConfigException($"Invalid value for 'min' attribute: '{minValueText}'. Hint:'{xNode.OuterXml}'");
                         }
@@ -640,14 +640,14 @@ namespace SCADA.Configuration
                         }
                         else if (valueType == ValueType.Integer)
                         {
-                            if (!Utility.TryParse2Long(value, out _))
+                            if (!Parser.TryParse2Long(value, out _))
                             {
                                 throw new ConfigException($"The 'value' attribute must be a integer value. Hint:'{xNode.OuterXml}'");
                             }
                         }
                         else if (valueType == ValueType.Decimal)
                         {
-                            if (!Utility.TryParse2Decimal(value, out _))
+                            if (!Parser.TryParse2Decimal(value, out _))
                             {
                                 throw new ConfigException($"The 'value' attribute must be a numeric value. Hint:'{xNode.OuterXml}'");
                             }
@@ -714,16 +714,45 @@ namespace SCADA.Configuration
 
         #region Setter & Getter
 
-        public TValue GetValue<TValue>(string configItem)
+        public TValue TryGetValue<TValue>(string configName, TValue defaultValue)
         {
-            if (!_configItems.ContainsKey(configItem))
+            if (_configItems.TryGetValue(configName, out var configItem))
             {
-                throw new KeyNotFoundException($"Config item '{configItem}' not found.");
+                return GetValueInner<TValue>(configItem);
             }
+            else
+            {
+                return defaultValue;
+            }
+        }
 
+        public bool TryGetValue<TValue>(string configName, out TValue value)
+        {
+            if (_configItems.TryGetValue(configName, out var configItem))
+            {
+                value = GetValueInner<TValue>(configItem);
+                return true;
+            }
+            else
+            {
+                value = default;
+                return false;
+            }
+        }
+
+        public TValue GetValue<TValue>(string configName)
+        {
+            if (_configItems.TryGetValue(configName, out var configItem))
+                return GetValueInner<TValue>(configItem);
+            else
+                throw new KeyNotFoundException($"Config item '{configName}' not found.");
+        }
+
+        private TValue GetValueInner<TValue>(ConfigItem configItem)
+        {
             var csType = typeof(TValue);
-            var stringValue = _configItems[configItem].Value;
-            var configType = _configItems[configItem].Type;
+            var stringValue = configItem.Value;
+            var configType = configItem.Type;
             try
             {
                 if (csType == typeof(string))
@@ -734,13 +763,13 @@ namespace SCADA.Configuration
                 {
                     if (configType == ValueType.Integer)
                     {
-                        if (Utility.TryParse2Long(stringValue, out long longValue))
+                        if (Parser.TryParse2Long(stringValue, out long longValue))
                         {
                             return (TValue)Convert.ChangeType(longValue, csType);
                         }
-                        throw new InvalidCastException($"Cannot convert config item '{configItem}' to type {csType.Name}.");
+                        throw new InvalidCastException($"Cannot convert config item '{configItem.Name}' to type {csType.Name}.");
                     }
-                    throw new InvalidCastException($"'{configItem}' type is not {ValueType.Integer}.");
+                    throw new InvalidCastException($"'{configItem.Name}' type is not {ValueType.Integer}.");
                 }
                 else if (csType == typeof(bool))
                 {
@@ -748,75 +777,75 @@ namespace SCADA.Configuration
                     {
                         return (TValue)Convert.ChangeType(stringValue, csType);
                     }
-                    throw new InvalidCastException($"'{configItem}' type is not {ValueType.Boolean}.");
+                    throw new InvalidCastException($"'{configItem.Name}' type is not {ValueType.Boolean}.");
                 }
                 else if (csType == typeof(double) || csType == typeof(float) || csType == typeof(decimal))
                 {
                     if (configType == ValueType.Decimal)
                     {
-                        if (Utility.TryParse2Decimal(stringValue, out var decimalValue))
+                        if (Parser.TryParse2Decimal(stringValue, out var decimalValue))
                         {
                             return (TValue)Convert.ChangeType(decimalValue, csType);
                         }
-                        else if (Utility.TryParse2Long(stringValue, out long longValue))
+                        else if (Parser.TryParse2Long(stringValue, out long longValue))
                         {
                             return (TValue)Convert.ChangeType(longValue, csType);
                         }
                         else
                         {
-                            throw new InvalidCastException($"Cannot convert config item '{configItem}' to type {csType.Name}.");
+                            throw new InvalidCastException($"Cannot convert config item '{configItem.Name}' to type {csType.Name}.");
                         }
                     }
                     if (configType == ValueType.Integer)
                     {
-                        if (Utility.TryParse2Long(stringValue, out long longValue))
+                        if (Parser.TryParse2Long(stringValue, out long longValue))
                         {
                             return (TValue)Convert.ChangeType(longValue, csType);
                         }
-                        throw new InvalidCastException($"Cannot convert config item '{configItem}' to type {csType.Name}.");
+                        throw new InvalidCastException($"Cannot convert config item '{configItem.Name}' to type {csType.Name}.");
                     }
-                    throw new InvalidCastException($"'{configItem}' type is not {ValueType.Decimal} or {ValueType.Integer}.");
+                    throw new InvalidCastException($"'{configItem.Name}' type is not {ValueType.Decimal} or {ValueType.Integer}.");
                 }
                 else if (csType == typeof(DateTime))
                 {
                     if (configType == ValueType.DateTime)
                     {
-                        if (Utility.TryParse2DateTime(stringValue, out DateTime dateTime))
+                        if (Parser.TryParse2DateTime(stringValue, out DateTime dateTime))
                         {
                             return (TValue)Convert.ChangeType(dateTime, csType);
                         }
-                        throw new InvalidCastException($"Cannot convert config item '{configItem}' to type {csType.Name}.");
+                        throw new InvalidCastException($"Cannot convert config item '{configItem.Name}' to type {csType.Name}.");
                     }
-                    throw new InvalidCastException($"'{configItem}' type is not {ValueType.DateTime}.");
+                    throw new InvalidCastException($"'{configItem.Name}' type is not {ValueType.DateTime}.");
                 }
                 else if (csType == typeof(System.Drawing.Color))
                 {
                     if (configType == ValueType.Color)
                     {
-                        if (Utility.TryParse2Color(stringValue, out System.Drawing.Color color))
+                        if (Parser.TryParse2Color(stringValue, out System.Drawing.Color color))
                         {
                             return (TValue)((object)color);
                         }
                     }
-                    throw new InvalidCastException($"'{configItem}' type is not {ValueType.Color}.");
+                    throw new InvalidCastException($"'{configItem.Name}' type is not {ValueType.Color}.");
                 }
                 else if (csType == typeof(FileInfo))
                 {
                     if (configType == ValueType.File)
                     {
-                        Utility.TryParse2File(stringValue, out var fileInfo);
+                        Parser.TryParse2File(stringValue, out var fileInfo);
                         return (TValue)((object)fileInfo);
                     }
-                    throw new InvalidCastException($"'{configItem}' type is not {ValueType.File}.");
+                    throw new InvalidCastException($"'{configItem.Name}' type is not {ValueType.File}.");
                 }
                 else if (csType == typeof(DirectoryInfo))
                 {
                     if (configType == ValueType.Folder)
                     {
-                        Utility.TryParse2Directory(stringValue, out var directoryInfo);
+                        Parser.TryParse2Directory(stringValue, out var directoryInfo);
                         return (TValue)((object)directoryInfo);
                     }
-                    throw new InvalidCastException($"'{configItem}' type is not {ValueType.Folder}.");
+                    throw new InvalidCastException($"'{configItem.Name}' type is not {ValueType.Folder}.");
                 }
                 else
                 {
@@ -826,7 +855,7 @@ namespace SCADA.Configuration
             }
             catch
             {
-                throw new InvalidCastException($"Cannot convert config item '{configItem}' to type {csType.Name}.");
+                throw new InvalidCastException($"Cannot convert config item '{configItem.Name}' to type {csType.Name}.");
             }
         }
 
@@ -834,6 +863,22 @@ namespace SCADA.Configuration
         {
             SetValue((configItem, value));
         }
+
+        //public void SetValue(string configName,object value)
+        //{
+
+        //}
+
+        public void SetValue(string configName1, object value1, string configName2, object value2)
+        {
+
+        }
+
+        public void SetValue(string configName1, object value1, string configName2, object value2, string configName3, object value3)
+        {
+
+        }
+
 
         public void SetValue(params (string configItem, object value)[] configValuePairs)
         {
@@ -936,22 +981,22 @@ namespace SCADA.Configuration
 
         #region Validate
 
-        private void ValidateValue(string configItem, object value)
+        private void ValidateValue(string configName, object value)
         {
             if (value == null)
             {
                 throw new ArgumentNullException("value");
             }
-            if (string.IsNullOrEmpty(configItem))
+            if (string.IsNullOrEmpty(configName))
             {
-                throw new ArgumentException("Config item cannot be null or empty.", nameof(configItem));
+                throw new ArgumentException("Config item cannot be null or empty.", nameof(configName));
             }
-            if (!_configItems.ContainsKey(configItem))
+            if(!_configItems.TryGetValue(configName,out ConfigItem configItem))
             {
-                throw new KeyNotFoundException($"Config item '{configItem}' not found.");
+                throw new KeyNotFoundException($"Config item '{configName}' not found.");
             }
             string valueString = Convert2String(value);
-            ValueType valueType = _configItems[configItem].Type;
+            ValueType valueType = configItem.Type;
             string strValue = valueString.Trim();
 
             #region CS Data Type Validation
@@ -964,55 +1009,55 @@ namespace SCADA.Configuration
             }
             else if (valueType == ValueType.Integer)
             {
-                if (Utility.TryParse2Long(strValue, out long @long))
+                if (Parser.TryParse2Long(strValue, out long @long))
                 {
                     number = @long;
                 }
                 else
                 {
-                    throw new InvalidCastException(ExceptionHelper.GetFormattedString("InvalidCastException_CannotConvert2Integer", strValue, configItem));
+                    throw new InvalidCastException(ExceptionHelper.GetFormattedString("InvalidCastException_CannotConvert2Integer", strValue, configName));
                 }
             }
             else if (valueType == ValueType.Boolean)
             {
                 if (!bool.TryParse(strValue, out _))
                 {
-                    throw new InvalidCastException(ExceptionHelper.GetFormattedString("InvalidCastException_CannotConvert2Boolean", strValue, configItem));
+                    throw new InvalidCastException(ExceptionHelper.GetFormattedString("InvalidCastException_CannotConvert2Boolean", strValue, configName));
                 }
             }
             else if (valueType == ValueType.Decimal)
             {
-                if (!Utility.TryParse2Decimal(strValue, out number))
+                if (!Parser.TryParse2Decimal(strValue, out number))
                 {
-                    throw new InvalidCastException(ExceptionHelper.GetFormattedString("InvalidCastException_CannotConvert2Decimal", strValue, configItem));
+                    throw new InvalidCastException(ExceptionHelper.GetFormattedString("InvalidCastException_CannotConvert2Decimal", strValue, configName));
                 }
             }
             else if (valueType == ValueType.File)
             {
-                if (Utility.TryParse2File(strValue, out var _) == false)
+                if (Parser.TryParse2File(strValue, out var _) == false)
                 {
-                    throw new InvalidCastException(ExceptionHelper.GetFormattedString("InvalidCastException_CannotConvert2Path", strValue, configItem));
+                    throw new InvalidCastException(ExceptionHelper.GetFormattedString("InvalidCastException_CannotConvert2Path", strValue, configName));
                 }
             }
             else if (valueType == ValueType.Folder)
             {
-                if (Utility.TryParse2Directory(strValue, out var _) == false)
+                if (Parser.TryParse2Directory(strValue, out var _) == false)
                 {
-                    throw new InvalidCastException(ExceptionHelper.GetFormattedString("InvalidCastException_CannotConvert2Path", strValue, configItem));
+                    throw new InvalidCastException(ExceptionHelper.GetFormattedString("InvalidCastException_CannotConvert2Path", strValue, configName));
                 }
             }
             else if (valueType == ValueType.DateTime)
             {
-                if (!Utility.TryParse2DateTime(strValue, out _))
+                if (!Parser.TryParse2DateTime(strValue, out _))
                 {
-                    throw new InvalidCastException(ExceptionHelper.GetFormattedString("InvalidCastException_CannotConvert2DateTime", strValue, configItem));
+                    throw new InvalidCastException(ExceptionHelper.GetFormattedString("InvalidCastException_CannotConvert2DateTime", strValue, configName));
                 }
             }
             else if (valueType == ValueType.Color)
             {
-                if (!Utility.TryParse2Color(strValue, out _))
+                if (!Parser.TryParse2Color(strValue, out _))
                 {
-                    throw new InvalidCastException(ExceptionHelper.GetFormattedString("InvalidCastException_CannotConvert2Color", strValue, configItem));
+                    throw new InvalidCastException(ExceptionHelper.GetFormattedString("InvalidCastException_CannotConvert2Color", strValue, configName));
                 }
             }
             else
@@ -1024,8 +1069,8 @@ namespace SCADA.Configuration
 
             #region Regular Expression Validation
 
-            var regex = _configItems[configItem].Regex;
-            var vtype = _configItems[configItem].Type;
+            var regex = configItem.Regex;
+            var vtype = configItem.Type;
             if (!string.IsNullOrWhiteSpace(regex))
             {
                 if ((vtype == ValueType.String ||
@@ -1033,15 +1078,15 @@ namespace SCADA.Configuration
                     vtype == ValueType.Folder)
                     && !Regex.IsMatch(strValue, regex))
                 {
-                    throw new ArgumentException(ExceptionHelper.GetFormattedString("ArgumentException_RegexValidation", strValue, _configItems[configItem].RegexNote, configItem));
+                    throw new ArgumentException(ExceptionHelper.GetFormattedString("ArgumentException_RegexValidation", strValue, configItem.RegexNote, configName));
                 }
                 else if (vtype == ValueType.Integer || vtype == ValueType.Decimal)
                 {
-                    if (Utility.TryParse2Decimal(strValue, out number))
+                    if (Parser.TryParse2Decimal(strValue, out number))
                     {
                         if (!Regex.IsMatch(number.ToString(CultureInfo.InvariantCulture), regex))
                         {
-                            throw new ArgumentException(ExceptionHelper.GetFormattedString("ArgumentException_RegexValidation", number.ToString(CultureInfo.InvariantCulture), _configItems[configItem].RegexNote, configItem));
+                            throw new ArgumentException(ExceptionHelper.GetFormattedString("ArgumentException_RegexValidation", number.ToString(CultureInfo.InvariantCulture), configItem.RegexNote, configName));
                         }
                     }
                 }
@@ -1051,15 +1096,15 @@ namespace SCADA.Configuration
 
             #region Options Validation
 
-            var options = _configItems[configItem].Options;
-            var type = _configItems[configItem].Type;
+            var options = configItem.Options;
+            var type = configItem.Type;
             if (options != null && options.Length > 0)
             {
                 if (type == ValueType.String)
                 {
                     if (!options.Contains(strValue))
                     {
-                        throw new ArgumentOutOfRangeException(nameof(valueString), $"The value '{strValue}' is not in the options for config item '{configItem}'.");
+                        throw new ArgumentOutOfRangeException(nameof(valueString), $"The value '{strValue}' is not in the options for config item '{configName}'.");
                     }
                 }
                 else if (type == ValueType.Integer)
@@ -1067,19 +1112,19 @@ namespace SCADA.Configuration
                     var longOptions = new List<long>();
                     foreach (var option in options)
                     {
-                        if (Utility.TryParse2Long(option, out long longValue))
+                        if (Parser.TryParse2Long(option, out long longValue))
                         {
                             longOptions.Add(longValue);
                         }
                         else
                         {
-                            throw new ConfigException($"option '{option}' can't convert to a integer for '{configItem}'.");
+                            throw new ConfigException($"option '{option}' can't convert to a integer for '{configName}'.");
                         }
                     }
-                    Utility.TryParse2Long(strValue, out long @long); // 肯定返回true，因为前面已经调用此函数校验过字符串了。
+                    Parser.TryParse2Long(strValue, out long @long); // 肯定返回true，因为前面已经调用此函数校验过字符串了。
                     if (!longOptions.Contains(@long))
                     {
-                        throw new ArgumentOutOfRangeException(nameof(valueString), $"The value '{strValue}' is not in the options for config item '{configItem}'.");
+                        throw new ArgumentOutOfRangeException(nameof(valueString), $"The value '{strValue}' is not in the options for config item '{configName}'.");
                     }
                 }
                 else if (type == ValueType.Decimal)
@@ -1087,19 +1132,19 @@ namespace SCADA.Configuration
                     var decimalOptions = new List<decimal>();
                     foreach (var option in options)
                     {
-                        if (Utility.TryParse2Decimal(option, out decimal decimalValue))
+                        if (Parser.TryParse2Decimal(option, out decimal decimalValue))
                         {
                             decimalOptions.Add(decimalValue);
                         }
                         else
                         {
-                            throw new ConfigException($"option '{option}' can't convert to a decimal for '{configItem}'.");
+                            throw new ConfigException($"option '{option}' can't convert to a decimal for '{configName}'.");
                         }
                     }
-                    Utility.TryParse2Decimal(strValue, out decimal @decimal); // 肯定返回true，因为前面已经调用此函数校验过字符串了。
+                    Parser.TryParse2Decimal(strValue, out decimal @decimal); // 肯定返回true，因为前面已经调用此函数校验过字符串了。
                     if (!decimalOptions.Contains(@decimal))
                     {
-                        throw new ArgumentOutOfRangeException(nameof(valueString), $"The value '{strValue}' is not in the options for config item '{configItem}'.");
+                        throw new ArgumentOutOfRangeException(nameof(valueString), $"The value '{strValue}' is not in the options for config item '{configName}'.");
                     }
                 }
             }
@@ -1110,9 +1155,9 @@ namespace SCADA.Configuration
 
             if (valueType == ValueType.Integer || valueType == ValueType.Decimal)
             {
-                if (number > _configItems[configItem].MaxValue || number < _configItems[configItem].MinValue)
+                if (number > configItem.MaxValue || number < configItem.MinValue)
                 {
-                    throw new ArgumentOutOfRangeException("", ExceptionHelper.GetFormattedString("ArgumentOutOfRangeException_MaxMin", strValue, configItem, _configItems[configItem].MinValue, _configItems[configItem].MaxValue));
+                    throw new ArgumentOutOfRangeException("", ExceptionHelper.GetFormattedString("ArgumentOutOfRangeException_MaxMin", strValue, configName, configItem.MinValue, configItem.MaxValue));
                 }
             }
 
@@ -1120,13 +1165,26 @@ namespace SCADA.Configuration
 
             #region Customized Rule Validation
 
-            var validationRule = CustomizeValidationRule(configItem);
-            if (validationRule != null && !validationRule.Invoke(configItem))
+            var validationRule = CustomizeValidationRule(configName);
+            if (validationRule != null && !validationRule.Invoke(configName))
             {
-                throw new ArgumentException(ExceptionHelper.GetFormattedString("ArgumentException_CustomizeValidation", strValue, configItem));
+                throw new ArgumentException(ExceptionHelper.GetFormattedString("ArgumentException_CustomizeValidation", strValue, configName));
             }
 
             #endregion Customized Rule Validation
+        }
+
+        public void ValidateValue(string configName1, object value1, string configName2, object value2)
+        {
+            ValidateValue(configName1, value1);
+            ValidateValue(configName2, value2);
+        }
+
+        public void ValidateValue(string configName1, object value1, string configName2, object value2, string configName3, object value3)
+        {
+            ValidateValue(configName1, value1);
+            ValidateValue(configName2, value2);
+            ValidateValue(configName3, value3);
         }
 
         private void ValidateValue((string configItem, object value)[] configValuePairs)
@@ -1219,7 +1277,9 @@ namespace SCADA.Configuration
             target.Attributes["value"].Value = valueString;
         }
 
-        private void Save(string xmlDocument)
+        // 正常情况下看到的文件是：app.config(新) app.config.bk(旧)
+        // Replace失败的话看到的文件是： app.config.tmp.bk(新) app.config(旧) app.config.bk(更旧)
+        private void Save(string xmlString)
         {
             string fileFolder = Path.GetDirectoryName(_xmlDocumentPath);
             string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(_xmlDocumentPath);
@@ -1228,7 +1288,7 @@ namespace SCADA.Configuration
             string bkFilePath = Path.Combine(fileFolder, bkFileName);
             string tmpFileName = fileNameWithoutExtension + ".tmp.bk" + extension;
             string tmpFilePath = Path.Combine(fileFolder, tmpFileName);
-            File.WriteAllText(tmpFilePath, xmlDocument);
+            File.WriteAllText(tmpFilePath, xmlString);
             File.Replace(tmpFilePath, _xmlDocumentPath, bkFilePath);
         }
 

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace SCADA.Configuration
 {
-    public class Utility
+    public static class Parser
     {
         public static bool TryParse2File(string valueString, out FileInfo fileInfo)
         {
@@ -157,16 +157,15 @@ namespace SCADA.Configuration
             {
                 return false;
             }
-            valueString = valueString.TrimStart('#');
-            if (valueString.Length != 6 && valueString.Length != 8)
+            if (valueString.Length != 7 && valueString.Length != 9)
             {
                 return false;
             }
-            if (!Regex.IsMatch(valueString, @"^[0-9a-fA-F]+$"))
+            if (!Regex.IsMatch(valueString, @"^#[0-9a-fA-F]+$"))
             {
                 return false;
             }
-            color = System.Drawing.ColorTranslator.FromHtml("#" + valueString);
+            color = System.Drawing.ColorTranslator.FromHtml(valueString);
             return true;
         }
     }

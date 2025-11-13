@@ -15,7 +15,7 @@ namespace SCADA.Configuration.WpfControls.Converters
             {
                 foreach (var option in options)
                 {
-                    if (Utility.TryParse2Long(option, out long @longOption) && Utility.TryParse2Long(value, out long @longValue))
+                    if (Parser.TryParse2Long(option, out long @longOption) && Parser.TryParse2Long(value, out long @longValue))
                     {
                         if (@longValue == @longOption)
                             return option;
@@ -26,7 +26,7 @@ namespace SCADA.Configuration.WpfControls.Converters
             {
                 foreach (var option in options)
                 {
-                    if (Utility.TryParse2Decimal(option, out decimal @decimalOption) && Utility.TryParse2Decimal(value, out decimal @decimalValue))
+                    if (Parser.TryParse2Decimal(option, out decimal @decimalOption) && Parser.TryParse2Decimal(value, out decimal @decimalValue))
                     {
                         if (@decimalValue == @decimalOption)
                             return option;

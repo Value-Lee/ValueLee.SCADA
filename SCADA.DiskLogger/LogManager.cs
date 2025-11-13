@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NLog;
+using NLog.Config;
 
 namespace SCADA.DiskLogger
 {
@@ -11,6 +12,8 @@ namespace SCADA.DiskLogger
     {
         public static Logger GetCurrentClassLogger()
         {
+            LoggingConfiguration config = XmlLoggingConfiguration.CreateFromXmlString("");
+            LogFactory factory = new LogFactory();
             return NLog.LogManager.GetCurrentClassLogger();
         }
 
@@ -21,7 +24,7 @@ namespace SCADA.DiskLogger
 
         public LogManager()
         {
-            
+            Logger d = LogManager.GetCurrentClassLogger();
         }
     }
 }

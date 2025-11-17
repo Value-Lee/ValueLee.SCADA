@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SCADA.ObjectModel
 {
-    internal interface IDeviceManager
+    public interface IDeviceManager
     {
         void AddDevice(IDevice device);
         void RemoveDevice(IDevice device);

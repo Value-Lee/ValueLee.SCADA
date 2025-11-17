@@ -9,6 +9,7 @@ namespace SCADA.ObjectModel
 {
     public delegate OperationResult ScriptMethodDelegate(params object[] args);
 
+    // 用于支持脚本功能的接口，Recipe Step
     public interface IScript : IModular
     {
         void Execute(string id, string methodName, params object[] args);

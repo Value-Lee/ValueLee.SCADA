@@ -46,6 +46,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SCADA.UIClient", "SCADA.UIClient\SCADA.UIClient.csproj", "{85A0DD3E-B6B2-4794-94A2-250FCE4D36FC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SCADA.UICore", "SCADA.UICore\SCADA.UICore.csproj", "{BCB82217-5B50-47C5-AB82-656AABC5C721}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -124,6 +128,14 @@ Global
 		{ED0A8A04-D60B-4C01-9468-E9BCDCD38ADB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ED0A8A04-D60B-4C01-9468-E9BCDCD38ADB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ED0A8A04-D60B-4C01-9468-E9BCDCD38ADB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{85A0DD3E-B6B2-4794-94A2-250FCE4D36FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85A0DD3E-B6B2-4794-94A2-250FCE4D36FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85A0DD3E-B6B2-4794-94A2-250FCE4D36FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85A0DD3E-B6B2-4794-94A2-250FCE4D36FC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BCB82217-5B50-47C5-AB82-656AABC5C721}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BCB82217-5B50-47C5-AB82-656AABC5C721}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BCB82217-5B50-47C5-AB82-656AABC5C721}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BCB82217-5B50-47C5-AB82-656AABC5C721}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

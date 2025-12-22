@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net452;net6.0</TargetFrameworks>
+    <TargetFrameworks>net10.0</TargetFrameworks>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
   </PropertyGroup>
@@ -11,7 +11,6 @@
 	<ItemGroup>
 		<PackageReference Include="NLog" Version="5.3.3" />
 		<PackageReference Include="NLog.Schema" Version="5.3.3" />
-		<PackageReference Include="System.ValueTuple" Version="4.5.0" />
 	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\SCADA.Common\SCADA.Common.csproj" />

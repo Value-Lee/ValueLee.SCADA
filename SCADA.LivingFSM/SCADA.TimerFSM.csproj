@@ -7,8 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Threading.Channels" Version="10.0.0" />
-    <PackageReference Include="System.ValueTuple" Version="4.6.1" />
+    <ProjectReference Include="..\SCADA.Common\SCADA.Common.csproj" />
   </ItemGroup>
 
 </Project>

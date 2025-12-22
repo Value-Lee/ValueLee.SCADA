@@ -1,4 +1,0 @@
-﻿- 状态机暂停重启改用TaskCompletionSource
-  - ManualResetEvent占用线程，改用TaskCompletionSource可以让出线程执行其他代码，提高程序性能。
-- 状态机改用Channel，杜绝BlockCollection，在等待下一个消息前不阻塞线程，避免线程池线程打满。
-- 

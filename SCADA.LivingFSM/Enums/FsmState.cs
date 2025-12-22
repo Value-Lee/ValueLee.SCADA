@@ -1,10 +1,11 @@
-﻿namespace SCADA.LivingFSM
+﻿namespace SCADA.TimerFSM.Enums
 {
     public enum FsmState
     {
         Same,
         Any,
         Remain,
-        Pangu
+        None,
+        Error,
     }
 }

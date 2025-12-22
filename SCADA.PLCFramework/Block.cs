@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 
 namespace SCADA.PLCFramework
 {
-    // Block不需要完整的配全所有的PLC地址，只是作为整合零散地址的整理参考。
     public class Block
     {
+        public string ID { get; set; }
+        public string Type { get; set; }
+        public bool Polling { get; set; }
         public string StartAddr { get; set; }
         public int Len { get; set; }
 

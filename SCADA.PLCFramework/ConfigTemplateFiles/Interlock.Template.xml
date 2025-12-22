@@ -1,1 +1,19 @@
-﻿<?xml version="1.0" encoding="utf-8" ?> 
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Interlock xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Action do="PM1.DO_ProcessManometerIsolationValve" value="true">
+		<Limit di="PM1.DI_PMVacuumSwitchVAC1" value="true"/>
+	</Action>
+	<Action do="PM1.DO_TurboPumpN2Purge" value="true">
+		<Limit di="PM1.DI_ForlineVacuunSwitchVAC2" value="true"/>
+		<Limit do="PM1.DO_TurboBackingValve" value="true"/>
+	</Action>
+	<Action do="PM1.DO_Line1UVOpen" value="true">
+		<Limit di="PM1.DI_UpperChamberClosed" value="true"/>
+		<Limit di="PM1.DI_SlitClosed" value="true"/>
+		<Limit di="PM1.DI_PMVacuumSwitchVAC1" value="true"/>
+		<Limit di="PM1.DI_ForlineVacuunSwitchVAC1" value="true"/>
+		<Limit di="PM1.DI_GBOK" value="true"/>
+		<Limit di="PM1.DI_FacilityOK" value="true"/>
+		<Limit di="PM1.DI_WaterLeakOK" value="true"/>
+	</Action>
+</Interlock>

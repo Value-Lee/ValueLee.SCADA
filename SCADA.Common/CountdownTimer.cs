@@ -11,14 +11,14 @@ namespace SCADA.Common
     {
         private readonly Stopwatch _stopwatch;
         private long _threshold;
-        public CountdownTimer(long thresholdMS)
+        public CountdownTimer(long threshold)
         {
-            if (thresholdMS < 0)
+            if (threshold < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(thresholdMS), "Threshold can not be negative.");
+                throw new ArgumentOutOfRangeException(nameof(threshold), "Threshold can not be negative.");
             }
             _stopwatch = new Stopwatch();
-            _threshold = thresholdMS;
+            _threshold = threshold;
         }
         public CountdownTimer(TimeSpan threshold) : this(Convert.ToInt64(threshold.TotalMilliseconds))
         {

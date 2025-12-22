@@ -8,19 +8,21 @@ namespace SCADA.PLCFramework
 {
     public class RegistItem
     {
-        public RegistItem(string name, string addr, ValueType type, string display, string desc)
+        public RegistItem(string name, string index, ValueType type, string display, string desc, string blockId)
         {
             Name = name;
-            Addr = addr;
+            Index = index;
             Type = type;
             Desc = desc;
             Display = display;
+            BlockId = blockId;
         }
 
         public string Name { get; }
-        public string Addr { get; }
+        public string Index { get; }
         public string Display { get; }
         public ValueType Type { get; }
+        public string BlockId { get; }
         public string Desc { get; }
     }
 }

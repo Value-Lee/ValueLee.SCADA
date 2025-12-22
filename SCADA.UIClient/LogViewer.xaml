@@ -1,0 +1,90 @@
+﻿<UserControl
+    x:Class="SCADA.UIClient.LogViewer"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:SCADA.UIClient"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="25" />
+            <ColumnDefinition />
+            <ColumnDefinition />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <Button
+            Grid.Row="0"
+            Grid.RowSpan="2"
+            Grid.Column="0"
+            Margin="0,1,5,1"
+            Background="Red" />
+        <Button
+            Grid.Row="2"
+            Grid.RowSpan="2"
+            Grid.Column="0"
+            Margin="0,1,5,1"
+            Background="Orange" />
+
+        <CheckBox Content="ALM/WRN" />
+        <CheckBox Content="No-Scroll" />
+        <xctk:CheckComboBox
+            x:Name="Modules"
+            Grid.Row="1"
+            Width="120"
+            Height="25"
+            Margin="0,5,0,5"
+            HorizontalAlignment="Left"
+            BorderThickness="0" />
+        <Grid Grid.Row="1" Grid.Column="1">
+            <ToggleButton
+                x:Name="LogToggle"
+                HorizontalContentAlignment="Stretch"
+                Background="White"
+                BorderBrush="Gray">
+                <StackPanel>
+                    <ItemsControl ItemsSource="{Binding Top3Logs}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock
+                                    FontSize="10"
+                                    Foreground="Gray"
+                                    Text="{Binding}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Path
+                        Margin="0,2,0,0"
+                        HorizontalAlignment="Center"
+                        Data="M0,0 L5,5 L10,0"
+                        Stroke="Black" />
+                </StackPanel>
+            </ToggleButton>
+
+            <Popup
+                IsOpen="{Binding IsChecked, ElementName=LogToggle}"
+                Placement="Bottom"
+                PlacementTarget="{Binding ElementName=LogToggle}"
+                StaysOpen="False">
+                <Border
+                    Width="300"
+                    MaxHeight="200"
+                    Background="White"
+                    BorderBrush="Gray"
+                    BorderThickness="1">
+                    <ListBox BorderThickness="0" ItemsSource="{Binding AllLogs}" />
+                </Border>
+            </Popup>
+        </Grid>
+
+    </Grid>
+</UserControl>

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 18
-VisualStudioVersion = 18.0.11205.157 d18.0
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36717.8
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SCADA.Configuration", "SCADA.Configuration\SCADA.Configuration.csproj", "{6C06D0B9-B53A-C9D3-0597-3A2071800AB1}"
 EndProject
@@ -17,7 +17,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SCADA.ObjectModel", "SCADA.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SCADA.PLCFramework", "SCADA.PLCFramework\SCADA.PLCFramework.csproj", "{7A180459-E064-4034-A2D9-8387D47834D3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SCADA.LivingFSM", "SCADA.LivingFSM\SCADA.LivingFSM.csproj", "{7C57F93B-2985-4836-926F-DFADB7814CE2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SCADA.TimerFSM", "SCADA.LivingFSM\SCADA.TimerFSM.csproj", "{7C57F93B-2985-4836-926F-DFADB7814CE2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SCADA.HardwareUnits", "SCADA.HardwareUnits\SCADA.HardwareUnits.csproj", "{268D2EF2-9CF2-4ECE-8453-9894361721B2}"
 EndProject
@@ -57,6 +57,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SCADA.Setup", "SCADA.Setup\SCADA.Setup.csproj", "{B95E4975-7020-40FD-8FC1-4CD66043CD0F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Apps", "Apps", "{D4EA9481-E402-4E37-AC23-95AF39BB4BC3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SCADA.TimerFSM.Samples", "SCADA.TimerFSM.Samples\SCADA.TimerFSM.Samples.csproj", "{92B23FA6-211F-476C-A34C-5F7DAC7BEF0C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SCADA.UI_Test", "SCADA.UI_Test\SCADA.UI_Test.csproj", "{AD42A498-2ACE-4D51-8129-AD6B05A15CB4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -156,6 +160,14 @@ Global
 		{B95E4975-7020-40FD-8FC1-4CD66043CD0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B95E4975-7020-40FD-8FC1-4CD66043CD0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B95E4975-7020-40FD-8FC1-4CD66043CD0F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92B23FA6-211F-476C-A34C-5F7DAC7BEF0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92B23FA6-211F-476C-A34C-5F7DAC7BEF0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92B23FA6-211F-476C-A34C-5F7DAC7BEF0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92B23FA6-211F-476C-A34C-5F7DAC7BEF0C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD42A498-2ACE-4D51-8129-AD6B05A15CB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD42A498-2ACE-4D51-8129-AD6B05A15CB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD42A498-2ACE-4D51-8129-AD6B05A15CB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD42A498-2ACE-4D51-8129-AD6B05A15CB4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

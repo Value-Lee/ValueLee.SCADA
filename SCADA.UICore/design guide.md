@@ -1,0 +1,4 @@
+﻿Device控件有一个Device所有特征作为其属性的DeviceData依赖属性,每次请求Device的最新状态,都返回一个全新的DeviceData对象,这保证了返回的所有特征是Device一致状态,不会出现例如气缸的左到位信号和右到位信号同时出现的情况.
+
+WPF应当检测value和旧值的所有属性有无变化再决定是否NotifyPropertyChanged,而不是值改变就刷新UI.
+

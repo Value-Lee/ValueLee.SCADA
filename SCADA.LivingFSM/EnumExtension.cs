@@ -1,10 +1,10 @@
 ﻿using System;
 
-namespace SCADA.LivingFSM
+namespace SCADA.TimerFSM
 {
     public static class EnumExtension
     {
-        public static string GetHashStringCode(this Enum @enum) => @enum.GetType().AssemblyQualifiedName + ((IConvertible)@enum).ToInt32(null);
+        public static string GetHashStringCode(this Enum @enum) => string.Format("{0}{1}{2}", @enum.GetType().AssemblyQualifiedName, ((IConvertible)@enum).ToInt32(null), @enum.ToString());
 
         public static bool IsSame(this Enum @enum, Enum enum2) => @enum.GetType() == enum2.GetType() && @enum.ToInt32() == enum2.ToInt32() && @enum.ToString() == enum2.ToString();
 

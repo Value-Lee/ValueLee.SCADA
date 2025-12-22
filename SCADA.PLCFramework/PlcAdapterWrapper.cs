@@ -1,9 +1,9 @@
 ﻿using MoreLinq;
-using Newtonsoft.Json.Linq;
 using SCADA.Common;
 using SCADA.ObjectModel;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -18,391 +18,386 @@ using System.Xml.Linq;
 
 namespace SCADA.PLCFramework
 {
-    public class PlcAdapterWrapper : IDevice, IConnection, IPlcAccessor
+    public class PlcAdapterWrapper : DeviceBase, IDevice, IConnection, IPlcAccessor
     {
-        private Channel<string> WriteCommandQueue = Channel.CreateUnbounded<string>();
-        private Channel<string> ReadCommandQueue = Channel.CreateUnbounded<string>();
-
-        private readonly ConcurrentQueue<CommandInfo> _commandQueue;
-        private readonly ConcurrentDictionary<string, (OperationResult<object> result, long timeStamp)> _registItemValueCache;
-        private readonly ConcurrentDictionary<int, TaskCompletionSource<object>> _registItemValueWaiter;
-
-        private readonly Dictionary<string, RegistItem> _registItems;
-
-        private readonly Dictionary<Block, IList<string>> _addrsOfBlock;
-        private readonly double _ticksToMillisecondsFactor = 1000.0 / Stopwatch.Frequency;
-
-        private int _id = int.MinValue;
-        private int GetId()
-        {
-            return Interlocked.Increment(ref _id);
-        }
-
+        private long _writeIdGenerator = long.MinValue;
         private readonly IPlcAdapter _plcAdapter;
         private readonly PlcInfo _plcInfo;
-
-        public PlcAdapterWrapper(PlcInfo plcInfo)
+        private readonly ConcurrentQueue<WriteData> _writeDatasAoQueue;
+        private readonly ConcurrentQueue<WriteData> _writeDatasDoQueue;
+        private readonly ConcurrentDictionary<long, bool> _writeIdsSet;
+        private int _aiSnapshotCount = 10;
+        private int _aiSnapshotIndex = 0;
+        private PlcByteSnapshot[] _aiValuesSnapshots;
+        private PlcByteSnapshot _aoValuesSnapshot;
+        private volatile PlcByteSnapshot _currentAIValuesSnapshot;
+        private PlcByteSnapshot _currentaoValuesSnapshot;
+        private volatile PlcBoolSnapshot _currentDIValuesSnapshot;
+        private PlcBoolSnapshot _currentdoValuesSnapshot;
+        private readonly int _diSnapshotCount = 10;
+        private int _diSnapshotIndex = 0;
+        private PlcBoolSnapshot[] _diValuesSnapshots;
+        private PlcBoolSnapshot _doValuesSnapshot;
+        private readonly HashSet<string> _toWriteDos = new HashSet<string>();
+        public long WriteIdGenerator => Interlocked.Increment(ref _writeIdGenerator);
+        public PlcAdapterWrapper(PlcInfo plcInfo) : base(plcInfo.Module, plcInfo.Name)
         {
-            _commandQueue = new ConcurrentQueue<CommandInfo>();
-            _registItemValueCache = new ConcurrentDictionary<string, (OperationResult<object> result, long timeStamp)>();
-            _registItemValueWaiter = new ConcurrentDictionary<int, TaskCompletionSource<object>>();
-            _addrsOfBlock = new Dictionary<Block, IList<string>>();
-            _registItems = new Dictionary<string, RegistItem>();
+            _writeDatasDoQueue = new ConcurrentQueue<WriteData>();
+            _writeDatasAoQueue = new ConcurrentQueue<WriteData>();
+
+            _writeIdsSet = new ConcurrentDictionary<long, bool>();
+
+            _diValuesSnapshots = new PlcBoolSnapshot[_diSnapshotCount];
+            _aiValuesSnapshots = new PlcByteSnapshot[_aiSnapshotCount];
+
             _plcInfo = plcInfo;
-            if (plcInfo.Blocks != null)
-                plcInfo.Blocks.ForEach(block => _addrsOfBlock.Add(block, _plcAdapter.ResolveAllAddrs(block.StartAddr, block.Type, block.Len)));
-            if (plcInfo.DIs != null)
-                plcInfo.DIs.ForEach(di => _registItems.Add(di.Key, di.Value));
-            if (plcInfo.DOs != null)
-                plcInfo.DOs.ForEach(@do => _registItems.Add(@do.Key, @do.Value));
-            if (plcInfo.AIs != null)
-                plcInfo.AIs.ForEach(ai => _registItems.Add(ai.Key, ai.Value));
-            if (plcInfo.AOs != null)
-                plcInfo.AOs.ForEach(ao => _registItems.Add(ao.Key, ao.Value));
-            _plcAdapter = Assembly.LoadFrom(_plcInfo.Assembly).CreateInstance(_plcInfo.Class) as IPlcAdapter;
+            _plcAdapter = Assembly.LoadFrom(plcInfo.Assembly)
+                .GetType(plcInfo.Class)
+                .GetConstructor([typeof(string)])
+                .Invoke([plcInfo.Address]) as IPlcAdapter;
+
+            // 启动定时读写PLC缓存到上位机线程
+            Thread poller = new(new ThreadStart(PollingWorker))
+            {
+                IsBackground = true,
+                Priority = ThreadPriority.AboveNormal
+            };
+            poller.Start();
         }
 
-        private void CheckNameExist(string name)
+        #region RW
+
+        private RegistItem GetRegistItem(string name)
         {
-            if (!_registItems.ContainsKey(name))
+            if (_plcInfo.DIs.TryGetValue(name, out RegistItem value1))
             {
-                throw new ArgumentException($"{name} doesn't exist in plc({_plcInfo.IP}:{_plcInfo.Port}).");
+                return value1;
             }
-        }
-
-        private object GetValueFromCache(string name, int cacheExpiryTime,long nowTicks)
-        {
-            if (_registItemValueCache.TryGetValue(name, out var value))
+            if (_plcInfo.DOs.TryGetValue(name, out RegistItem value))
             {
-                if ((nowTicks - value.timeStamp) * _ticksToMillisecondsFactor <= cacheExpiryTime)
-                {
-                    return value;
-                }
+                return value;
+            }
+            if (_plcInfo.AIs.TryGetValue(name, out RegistItem value2))
+            {
+                return value2;
+            }
+            if (_plcInfo.AOs.TryGetValue(name, out RegistItem value3))
+            {
+                return value3;
             }
             return null;
         }
 
-        private bool GetBlockInclude(string addr, out Block block)
+
+        #region Read
+        private void Read(string name, out long timestamp, out object value)
         {
-            foreach (var b in _addrsOfBlock.Keys)
+            timestamp = 0;
+            value = null;
+            var item = GetRegistItem(name);
+            var block = _plcInfo.Blocks.GetValueOrDefault(item.BlockId);
+            if (block.Type == "di")
             {
-                var addrs = _addrsOfBlock[b];
-                if (addrs.Contains(addr))
-                {
-                    block = b;
-                    return false;
-                }
+                timestamp = _currentDIValuesSnapshot.Timestamp;
+                value = _currentDIValuesSnapshot.Values[int.Parse(item.Index)];
             }
-            block = null;
-            return true;
-        }
-
-        string IConnection.Address { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-        public void Initialize()
-        {
-            _plcAdapter.Connect();
-
-            if (_plcInfo.Blocks != null)
+            else if (block.Type == "do")
             {
-                Task.Run(async () =>
-                {
-                    while (true)
-                    {
-                        // todo 添加计时器，如果一次循环少于10ms，
-                        var list = new List<CommandInfo>();
-                        int count = 0;
-                        // 一次性把队列中的命令取干净，取的越多，整体的读写速度越高。但是做个限制，最多读1000个，这个上限值是否需要以及是否最合适，待验证。
-                        // 假设100个命令，Block配置8个，8读2写=10次网络交互，开销是10×10ms=100ms，除以100，平均每个读或写操作是1ms。
-                        // 假设最差情况是10个命令，平均是10ms. 10ms能够完成一次读或写，已经足够快了。即便是阻塞性先后读5次，也只是50ms，完全能够算的上是瞬时操作。
-                        while (count > 999)
-                        {
-                            if (_commandQueue.TryDequeue(out var command))
-                            {
-                                list.Add(command);
-                                count++;
-                            }
-                            else
-                            {
-                                break;
-                            }
-                        }
-
-                        if (list.Count > 0)
-                        {
-                            #region 先处理读
-
-                            #region ① 处理允许从缓存读取的
-                            for (int i = 0; i < list.Count; i++)
-                            {
-                                // 批量读，使用同一个时间戳，可以避免应该从同一个快照的数字IO被分成两个快照
-                                long nowTicks = Stopwatch.GetTimestamp();
-
-                                if (list[i].Operation == Operation.Read && list[i].AllowFromCache == true)
-                                {
-                                    for (int j = 0; j < list[i].Names.Count; j++)
-                                    {
-                                        object value = GetValueFromCache(list[i].Names[j], list[i].CacheExpiryTime, nowTicks);
-                                        if (value != null)
-                                        {
-                                            list[i].Values[j] = value;
-                                        }
-                                    }
-                                    if (list[i].Values.All(x => x != null))
-                                    {
-                                        if (list[i].Values.Count > 1)
-                                        {
-                                            _registItemValueWaiter[list[i].ID].SetResult(list[i].Values);
-                                        }
-                                        else
-                                        {
-                                            _registItemValueWaiter[list[i].ID].SetResult(list[i].Values[0]);
-                                        }
-                                        _registItemValueWaiter.TryRemove(list[i].ID, out _);
-                                    }
-                                }
-                            }
-
-                            //  删除已经处理完毕的
-                            for (int i = list.Count - 1; i >= 0; i--)
-                            {
-                                if (list[i].Values.All(x => x != null))
-                                {
-                                    list.RemoveAt(i);
-                                }
-                            }
-                            #endregion
-
-                            #region ② 处理不允许从缓存读的和缓存失效的
-                            List<Block> blocks = new List<Block>();
-                            for (int i = 0; i < list.Count; i++)
-                            {
-                                if (list[i].Operation == Operation.Read)
-                                {
-                                    for (int j = 0; j < list.Count; j++)
-                                    {
-                                        if (list[i].Values[j] == null)
-                                        {
-                                            if (!GetBlockInclude(list[i].Names[j], out Block block))
-                                            {
-                                                blocks.Add(block);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            // 读取Block
-                            #endregion
-
-                            #region ③ 零散读取不能整合到Block批量读取的地址
-
-                            #endregion
-                            #endregion
-
-                            #region 后处理写
-                            // 命中Block,就借助Block批量写， Block的其他值从缓存中获取，获取不到的话，产生一次读取
-                            // 未命中Block的地址，单独产生一次写
-                            #endregion
-                        }
-                    }
-                });
+                timestamp = _currentdoValuesSnapshot.Timestamp;
+                value = _currentdoValuesSnapshot.Values[int.Parse(item.Index)];
             }
-        }
-
-        public void Reset()
-        {
-            _plcAdapter.Disconnect();
-            _plcAdapter.Connect();
-        }
-
-        public void Terminate()
-        {
-        }
-
-        OperationResult IConnection.Connect()
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<OperationResult> IConnection.ConnectAsync()
-        {
-            throw new NotImplementedException();
-        }
-
-        OperationResult IConnection.Disconnect()
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<OperationResult> IConnection.DisconnectAsync()
-        {
-            throw new NotImplementedException();
-        }
-
-        #region IPlcAccessor
-        public int Read(params string[] names)
-        {
-            return Read(true, 100, names);
-        }
-
-        public int Read(bool allowFromCache, params string[] names)
-        {
-            return Read(allowFromCache, 100, names);
-        }
-
-        public int Read(bool allowFromCache, int cacheExpiryTime, params string[] names)
-        {
-            names.ForEach(x => CheckNameExist(x));
-            int id = GetId();
-            _commandQueue.Enqueue(new CommandInfo()
+            else if (block.Type == "ai")
             {
-                ID = id,
-                Names = names,
-                Values = new object[names.Length],
-                AllowFromCache = allowFromCache,
-                CacheExpiryTime = cacheExpiryTime,
-                Operation = Operation.Read
-            });
-            _registItemValueWaiter.TryAdd(id, new TaskCompletionSource<object>());
-            return id;
-        }
-
-        public int Write(string name, object value)
-        {
-            CheckNameExist(name);
-            int id = GetId();
-            _commandQueue.Enqueue(new CommandInfo()
-            {
-                ID = id,
-                Names = new string[] { name },
-                Values = new object[] { value },
-                Operation = Operation.Write
-            });
-            _registItemValueWaiter.TryAdd(id, new TaskCompletionSource<object>());
-            return id;
-        }
-
-        public int Write(string name1, object value1, string name2, object value2)
-        {
-            CheckNameExist(name1);
-            CheckNameExist(name2);
-
-            int id = GetId();
-            _commandQueue.Enqueue(new CommandInfo()
-            {
-                ID = id,
-                Names = new string[] { name1, name2 },
-                Values = new object[] { value1, value2 },
-                Operation = Operation.Write
-            });
-            _registItemValueWaiter.TryAdd(id, new TaskCompletionSource<object>());
-            return id;
-        }
-
-        public int Write(string name1, object value1, string name2, object value2, string name3, object value3)
-        {
-            CheckNameExist(name1);
-            CheckNameExist(name2);
-            CheckNameExist(name3);
-            int id = GetId();
-            _commandQueue.Enqueue(new CommandInfo()
-            {
-                ID = id,
-                Names = new string[] { name1, name2, name3 },
-                Values = new object[] { value1, value2, value3 },
-                Operation = Operation.Write
-            });
-            _registItemValueWaiter.TryAdd(id, new TaskCompletionSource<object>());
-            return id;
-        }
-
-        public int Write(string name1, object value1, string name2, object value2, string name3, object value3, string name4, object value4)
-        {
-            CheckNameExist(name1);
-            CheckNameExist(name2);
-            CheckNameExist(name3);
-            CheckNameExist(name4);
-            int id = GetId();
-            _commandQueue.Enqueue(new CommandInfo()
-            {
-                ID = id,
-                Names = new string[] { name1, name2, name3, name4 },
-                Values = new object[] { value1, value2, value3, value4 },
-                Operation = Operation.Write
-            });
-            _registItemValueWaiter.TryAdd(id, new TaskCompletionSource<object>());
-            return id;
-        }
-
-        public int Write(string name1, object value1, string name2, object value2, string name3, object value3, string name4, object value4, string name5, object value5)
-        {
-            CheckNameExist(name1);
-            CheckNameExist(name2);
-            CheckNameExist(name3);
-            CheckNameExist(name4);
-            CheckNameExist(name5);
-            int id = GetId();
-            _commandQueue.Enqueue(new CommandInfo()
-            {
-                ID = id,
-                Names = new string[] { name1, name2, name3, name4, name5 },
-                Values = new object[] { value1, value2, value3, value4, value5 },
-                Operation = Operation.Write
-            });
-            _registItemValueWaiter.TryAdd(id, new TaskCompletionSource<object>());
-            return id;
-        }
-
-        public int Write(params (string name, object value)[] nameValues)
-        {
-            nameValues.ForEach(x => CheckNameExist(x.name));
-            int id = GetId();
-            _commandQueue.Enqueue(new CommandInfo()
-            {
-                ID = id,
-                Names = nameValues.Select(x => x.name).ToArray(),
-                Values = nameValues.Select(x => x.value).ToArray(),
-                Operation = Operation.Write
-            });
-            _registItemValueWaiter.TryAdd(id, new TaskCompletionSource<object>());
-            return id;
-        }
-
-        public bool CheckResult(int id, out OperationResult value)
-        {
-            if (_registItemValueWaiter.TryGetValue(id, out var tcs))
-            {
-                if (tcs.Task.IsCompleted)
+                timestamp = _currentAIValuesSnapshot.Timestamp;
+                int byteIndex = -1;
+                int bitIndex = -1;
+                int dotIndex = item.Index.IndexOf('.');
+                if (dotIndex != -1)
                 {
-                    value = (tcs.Task.GetAwaiter().GetResult()) as OperationResult;
-                    _registItemValueWaiter.TryRemove(id, out var _);
-                    return true;
+                    ReadOnlySpan<char> chars = item.Index;
+                    byteIndex = int.Parse(chars.Slice(0, dotIndex));
+                    bitIndex = int.Parse(chars.Slice(dotIndex, item.Index.Length - dotIndex));
                 }
                 else
                 {
-                    value = null;
-                    return false;
+                    byteIndex = int.Parse(item.Index);
+                }
+
+                if (item.Type.ToString().StartsWith("string"))
+                {
+
+                }
+                else
+                {
+                    switch (item.Type)
+                    {
+                        case ValueType.@bool:
+                            break;
+                        case ValueType.int8:
+                            break;
+                        case ValueType.int16:
+                            break;
+                        case ValueType.int32:
+                            break;
+                        case ValueType.int64:
+                            break;
+                        case ValueType.uint8:
+                            break;
+                        case ValueType.uint16:
+                            break;
+                        case ValueType.uint32:
+                            break;
+                        case ValueType.uint64:
+                            break;
+                        case ValueType.@float:
+                            break;
+                        case ValueType.@double:
+                            break;
+                    }
                 }
             }
-            else
+            else if (block.Type == "ao")
             {
-                throw new Exception($"ID:{id} not found.");
+
             }
         }
 
-        public async Task<OperationResult> WaitResult(int id)
+        public ReadResult<T> Read<T>(string name)
         {
-            if (_registItemValueWaiter.TryGetValue(id, out var tcs))
+            Read(name, out long timestamp, out object value);
+            return new ReadResult<T>(timestamp, (T)value);
+        }
+
+        public ReadResult<T1, T2> Read<T1, T2>(string name1, string name2)
+        {
+            var result = new ReadResult<T1, T2>();
+            Read(name1, out long timestamp1, out object value1);
+            Read(name2, out long timestamp2, out object value2);
+            result.Timestamp = timestamp2;
+            result.Value1 = (T1)value1;
+            result.Value2 = (T2)value2;
+            return result;
+        }
+
+        public ReadResult<T1, T2, T3> Read<T1, T2, T3>(string name1, string name2, string name3)
+        {
+            var result = new ReadResult<T1, T2, T3>();
+            Read(name1, out long timestamp1, out object value1);
+            Read(name2, out long timestamp2, out object value2);
+            Read(name3, out long timestamp3, out object value3);
+            result.Timestamp = timestamp3;
+            result.Value1 = (T1)value1;
+            result.Value2 = (T2)value2;
+            result.Value3 = (T3)value3;
+            return result;
+        }
+
+        public ReadResult<T1, T2, T3, T4> Read<T1, T2, T3, T4>(string name1, string name2, string name3, string name4)
+        {
+            var result = new ReadResult<T1, T2, T3, T4>();
+            Read(name1, out long timestamp1, out object value1);
+            Read(name2, out long timestamp2, out object value2);
+            Read(name3, out long timestamp3, out object value3);
+            Read(name4, out long timestamp4, out object value4);
+            result.Timestamp = timestamp4;
+            result.Value1 = (T1)value1;
+            result.Value2 = (T2)value2;
+            result.Value3 = (T3)value3;
+            result.Value4 = (T4)value4;
+            return result;
+        }
+
+        public ReadResult<T1, T2, T3, T4, T5> Read<T1, T2, T3, T4, T5>(string name1, string name2, string name3, string name4, string name5)
+        {
+            var result = new ReadResult<T1, T2, T3, T4, T5>();
+            Read(name1, out long timestamp1, out object value1);
+            Read(name2, out long timestamp2, out object value2);
+            Read(name3, out long timestamp3, out object value3);
+            Read(name4, out long timestamp4, out object value4);
+            Read(name5, out long timestamp5, out object value5);
+            result.Timestamp = timestamp5;
+            result.Value1 = (T1)value1;
+            result.Value2 = (T2)value2;
+            result.Value3 = (T3)value3;
+            result.Value4 = (T4)value4;
+            result.Value5 = (T5)value5;
+            return result;
+        }
+
+        public ReadResult<T1, T2, T3, T4, T5, T6> Read<T1, T2, T3, T4, T5, T6>(string name1, string name2, string name3, string name4, string name5, string name6)
+        {
+            var result = new ReadResult<T1, T2, T3, T4, T5, T6>();
+            Read(name1, out long timestamp1, out object value1);
+            Read(name2, out long timestamp2, out object value2);
+            Read(name3, out long timestamp3, out object value3);
+            Read(name4, out long timestamp4, out object value4);
+            Read(name5, out long timestamp5, out object value5);
+            Read(name6, out long timestamp6, out object value6);
+            result.Timestamp = timestamp6;
+            result.Value1 = (T1)value1;
+            result.Value2 = (T2)value2;
+            result.Value3 = (T3)value3;
+            result.Value4 = (T4)value4;
+            result.Value5 = (T5)value5;
+            result.Value6 = (T6)value6;
+            return result;
+        }
+
+        public ReadResult Read(params string[] names)
+        {
+            var result = new ReadResult();
+            result.Values = new object[names.Length];
+            for (int i = 0; i < names.Length; i++)
             {
-                var ret = (await tcs.Task.ConfigureAwait(false)) as OperationResult;
-                _registItemValueWaiter.TryRemove(id, out var _);
-                return ret;
+                Read(names[i], out long timestamp, out object value);
+                result.Timestamp = timestamp;
+                result.Values[i] = value;
             }
-            else
+            return result;
+        }
+
+        #endregion
+
+        #region Write
+        public long Write<T>(string name, T value)
+        {
+            var id = WriteIdGenerator;
+            _writeIdsSet.TryAdd(id, false);
+            _writeDatasDoQueue.Enqueue(new WriteData)
+            return id;
+
+        }
+
+        public long Write<T1,T2>(string name1, T1 value1, string name2, T2 value2)
+        {
+            
+        }
+
+        public long Write<T1,T2,T3>(string name1, T1 value1, string name2, T2 value2, string name3, T3 value3)
+        {
+           
+        }
+
+        public long Write<T1,T2,T3,T4>(string name1, T1 value1, string name2, T2 value2, string name3, T3 value3, string name4, T4 value4)
+        {
+       
+        }
+
+        public long Write<T1, T2, T3, T4,T5>(string name1, T1 value1, string name2, T2 value2, string name3, T3 value3, string name4, T4 value4, string name5, T5 value5)
+        {
+           
+        }
+
+        public long Write<T1, T2, T3, T4, T5,T6>(string name1, T1 value1, string name2, T2 value2, string name3, T3 value3, string name4, T4 value4, string name5, T5 value5, string name6, T6 value6)
+        {
+           
+        }
+
+        public long Write(params (string name, object value)[] nameValues)
+        {
+            
+        } 
+        #endregion
+
+        #endregion RW
+
+        public bool WriteCompleted(long id)
+        {
+            throw new NotImplementedException();
+        }
+        private void PollingWorker()
+        {
+            while (true)
             {
-                throw new Exception($"ID:{id} not found.");
+                foreach (var block in _plcInfo.Blocks)
+                {
+                    // polling di & ai
+
+                    if (block.Value.Type == "di" && block.Value.Polling == true)
+                    {
+                        var bools = _plcAdapter.ReadDIs(block.Value.StartAddr, block.Value.Len);
+                        var nextIndex = (_diSnapshotIndex++) % _diSnapshotCount;
+                        _diValuesSnapshots[nextIndex].Timestamp = DateTime.Now.Ticks;
+                        bools.CopyTo(_diValuesSnapshots[nextIndex].Values);
+                        Interlocked.Exchange(ref _currentDIValuesSnapshot, _diValuesSnapshots[nextIndex]);
+                    }
+
+                    if (block.Value.Type == "ai" && block.Value.Polling == true)
+                    {
+                        var bytes = _plcAdapter.ReadAIs(block.Value.StartAddr, block.Value.Len);
+                        var nextIndex = (_aiSnapshotIndex++) % _aiSnapshotCount;
+                        _diValuesSnapshots[nextIndex].Timestamp = DateTime.Now.Ticks;
+                        bytes.CopyTo(_aiValuesSnapshots[nextIndex].Values);
+                        Interlocked.Exchange(ref _currentAIValuesSnapshot, _aiValuesSnapshots[nextIndex]);
+                    }
+
+                    // write do & ao
+                    if (block.Value.Type == "do" && block.Value.Polling == true)
+                    {
+                        _toWriteDos.Clear();
+                        while (_writeDatasDoQueue.TryPeek(out var writeData))
+                        {
+                            bool isPresent = false;
+                            foreach (var item in writeData.NameValuePairs)
+                            {
+                                if (_toWriteDos.Any(x => x == item.name))
+                                {
+                                    isPresent = true;
+                                    break;
+                                }
+                            }
+                            if (isPresent)
+                            {
+                                break;
+                            }
+                            else
+                            {
+                                writeData.NameValuePairs.ForEach(x => _toWriteDos.Add(x.name));
+                                _writeDatasDoQueue.TryDequeue(out var _);
+                            }
+                        }
+                        _currentdoValuesSnapshot.Values.AsSpan().CopyTo(_doValuesSnapshot.Values);
+                        // 把_toWriteDos准换成bool或字节写进_doValuesSnapshot.Values
+                        _plcAdapter.WriteDOs(block.Value.StartAddr, block.Value);
+                        // 更新_doValuesSnapshot时间戳
+                        _doValuesSnapshot.Timestamp = DateTime.Now.Ticks;
+                        Interlocked.Exchange(ref _currentdoValuesSnapshot, _doValuesSnapshot);
+                    }
+
+                    if (block.Value.Type == "ao" && block.Value.Polling == true)
+                    {
+                        while (_writeDatasAoQueue.TryPeek(out var writeData))
+                        {
+                            bool isPresent = false;
+                            foreach (var item in writeData.NameValuePairs)
+                            {
+                                if (_toWriteDos.Any(x => x == item.name))
+                                {
+                                    isPresent = true;
+                                    break;
+                                }
+                            }
+                            if (isPresent)
+                            {
+                                break;
+                            }
+                            else
+                            {
+                                writeData.NameValuePairs.ForEach(x => _toWriteDos.Add(x.name));
+                                _writeDatasAoQueue.TryDequeue(out var _);
+                            }
+                        }
+                        _currentaoValuesSnapshot.Values.AsSpan().CopyTo(_aoValuesSnapshot.Values);
+                        // 把_toWriteDos准换成bool或字节写进_aoValuesSnapshot.Values
+                        _plcAdapter.WriteAOs(block.Value.StartAddr, block.Value);
+                        // 更新_aoValuesSnapshot时间戳
+                        _aoValuesSnapshot.Timestamp = DateTime.Now.Ticks;
+                        Interlocked.Exchange(ref _currentaoValuesSnapshot, _aoValuesSnapshot);
+                    }
+                }
+
+                Thread.Sleep(20);
             }
         }
-        #endregion
     }
 }

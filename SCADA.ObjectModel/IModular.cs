@@ -4,6 +4,5 @@
     {
         string Module { get; }
         string Name { get; }
-        string Id { get; }
     }
 }

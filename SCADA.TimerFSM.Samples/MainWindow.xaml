@@ -1,0 +1,54 @@
+﻿<Window
+    x:Class="SCADA.TimerFSM.Samples.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:SCADA.TimerFSM.Samples"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="MainWindow"
+    Width="800"
+    Height="450"
+    mc:Ignorable="d">
+    <Grid>
+        <Grid Width="300" VerticalAlignment="Top">
+            <ToggleButton x:Name="LogToggle" 
+                  HorizontalContentAlignment="Stretch"
+                  BorderBrush="Gray" Background="White">
+                <StackPanel>
+                    <ItemsControl ItemsSource="{Binding Top3Logs}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding }" Foreground="Gray" FontSize="10"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Path Data="M0,0 L5,5 L10,0" Stroke="Black" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                </StackPanel>
+            </ToggleButton>
+
+            <Popup IsOpen="{Binding IsChecked, ElementName=LogToggle}" 
+           StaysOpen="False" 
+           PlacementTarget="{Binding ElementName=LogToggle}"
+           Placement="Bottom">
+                <Border BorderBrush="Gray" BorderThickness="1" Background="White" MaxHeight="200" Width="300">
+                    <ListBox ItemsSource="{Binding AllLogs}" BorderThickness="0">
+                    </ListBox>
+                </Border>
+            </Popup>
+        </Grid>
+        <!--<UniformGrid>
+            <Button
+                Width="200"
+                Height="40"
+                Content="Traffic Light" />
+            <Button
+                Width="200"
+                Height="40"
+                Content="Order Lifetime" />
+            <Button
+                Width="200"
+                Height="40"
+                Content="Load and Scan Barcode" />
+        </UniformGrid>-->
+    </Grid>
+</Window>

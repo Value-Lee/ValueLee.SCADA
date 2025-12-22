@@ -1,4 +1,8 @@
-﻿# 单一写入原则
+﻿Device必须有个Monitor方法,让Module去调用,Module在其状态机的Timer中调用所有属于该module的Device的Monitor.
+
+
+
+# 单一写入原则
 
 > PLC暴露给PC的地址，必须满足任一地址都必须满足只允许一方写入，另一方绝不允许写入。
 >

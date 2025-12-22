@@ -1,13 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netframework452;net8.0</TargetFrameworks>
+    <TargetFrameworks>net10.0</TargetFrameworks>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\SCADA.Common\SCADA.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Aligners\" />
   </ItemGroup>
 
 </Project>

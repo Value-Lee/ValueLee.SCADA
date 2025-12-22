@@ -7,25 +7,27 @@
   4. 要支持直接写PLC，如配方，它不需要实时读取，只有在打开某个界面时才读取PLC数据，可以配置为不读PLC，在点击发送配方时，写一次。
   5. 所以在此文件中只是配置的是需要实时刷新的PLC地址
 -->
-<PlcInfo id="1" ip="192.168.2.10" port="12345" class="SCADA.PlcAdatpters.BeckoffPlcAdapter" assembly="SCADA.PlcAdatpters.dll">
-	<Block id="1" type="di" startaddr="" len="" polling="true"/>
-	<Block id="2" type="do" startaddr="" len="" polling="true"/>
-	<Block id="3" type="ai" startaddr="" len="" polling="true"/>
-	<Block id="4" type="ao" startaddr="" len="" polling="true"/>
-	<!--Read或Write时必须传入Block包含的所有Item，适用大字节的Recipe-->
-	<Block id="5" type="ai" startaddr="" len="" polling="false"/>
-	<!--Read或Write时时必须传入Block包含的所有Item，适用大字节的Recipe-->
-	<Block id="6" type="ao" startaddr="" len="" polling="false"/>
-	<DIs>
-		<Item name="DI_DoorClosed" addr="" type="" blockid="1" display="" desc="Door Closed"/>
-	</DIs>
-	<DOs>
-		<Item name="DO_CloseDoor" addr="" type="" blockid="2" display="" desc="Close Door"/>
-	</DOs>
-	<AIs>
-		<Item name="AI_ChamberPressure" addr="" type="1" blockid="3" display="" desc="Chamber Pressure"/>
-	</AIs>
-	<AOs>
-		<Item name="AO_GasLineTemperature" addr="" type="1" blockid="4" display="" desc="Gas Line Temperature"/>
-	</AOs>
+<PlcInfo module="PM1" name="PLC" address="192.168.2.10:12345" class="SCADA.PlcAdatpters.BeckoffPlcAdapter" assembly="SCADA.PlcAdatpters.dll">
+	<BlockList>
+		<PollingBlock id="1" type="di" startaddr="" len=""/>
+		<PollingBlock id="2" type="do" startaddr="" len=""/>
+		<PollingBlock id="3" type="ai" startaddr="" len=""/>
+		<PollingBlock id="4" type="ao" startaddr="" len=""/>
+		<!--Read或Write时必须传入Block包含的所有Item，适用大字节块的Recipe-->
+		<StaticBlock id="5" type="ai" startaddr="" len=""/>
+		<!--Read或Write时时必须传入Block包含的所有Item，适用大字节块的Recipe-->
+		<StaticBlock id="6" type="ao" startaddr="" len=""/>
+	</BlockList>
+	<DIList>
+		<Item name="DI_DoorClosed" index="" type="bool" blockid="1" display="" desc="Door Closed"/>
+	</DIList>
+	<DOList>
+		<Item name="DO_CloseDoor" index="" type="bool" blockid="2" display="" desc="Close Door"/>
+	</DOList>
+	<AIList>
+		<Item name="AI_ChamberPressure" index="9.1" type="bool" blockid="3" display="" desc="Chamber Pressure"/>
+	</AIList>
+	<AOList>
+		<Item name="AO_GasLineTemperature" index="4" type="int8" blockid="4" display="" desc="Gas Line Temperature"/>
+	</AOList>
 </PlcInfo>

@@ -9,9 +9,8 @@ namespace SCADA.Common
     public interface IConnection
     {
         string Address { get; set; }
+        OperationResult<bool> IsConnected();
         OperationResult Connect();
-        Task<OperationResult> ConnectAsync();
         OperationResult Disconnect();
-        Task<OperationResult> DisconnectAsync();
     }
 }
